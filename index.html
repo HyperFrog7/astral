@@ -53,6 +53,7 @@
                 >
                 <div class="game-modal-controls">
                     <button id="fullscreen-btn">Fullscreen</button>
+                    <button id="cloak-game-btn">Open in new tab</button>
                     <button id="download-btn">Download</button>
                     <button id="close-btn" class="close-btn">Close</button>
                 </div>
@@ -63,6 +64,52 @@
                 frameborder="0"
                 allowfullscreen
             ></iframe>
+        </div>
+
+        <div id="settings-modal" class="settings-modal hidden">
+            <div class="settings-content">
+                <div class="settings-header">
+                    <h2>Settings</h2>
+                    <button
+                        id="close-settings-btn"
+                        class="close-btn settings-btn"
+                    >
+                        ✕
+                    </button>
+                </div>
+                <div class="settings-body">
+                    <div class="settings-option">
+                        <span>Tab Cloak</span>
+                        <select id="cloak-preset-select" class="settings-btn">
+                            <option value="default">Default (Astral)</option>
+                            <option value="clever">Clever</option>
+                            <option value="grades">Grades</option>
+                            <option value="google">Google</option>
+                            <option value="drive">Google Drive</option>
+                            <option value="classroom">Google Classroom</option>
+                            <option value="newtab">New Tab</option>
+                        </select>
+                    </div>
+                    <div class="settings-option">
+                        <span>Cloak Entire Site</span>
+                        <button id="cloak-site-btn" class="settings-btn">
+                            Launch in about:blank
+                        </button>
+                    </div>
+                    <div class="settings-option">
+                        <label for="panic-url-input">Panic URL</label>
+                        <input
+                            class="setting-input"
+                            type="url"
+                            id="panic-url-input"
+                            placeholder="https://sonion.com"
+                        />
+                        <button id="save-panic-url-btn" class="settings-btn">
+                            Save
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
         <script src="script.js" defer></script>
     </body>

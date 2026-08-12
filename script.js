@@ -1,6 +1,112 @@
 let allGames = [];
 let activeGameFile = "";
 
+const cloakPresets = {
+  default: {
+    title: "Astral",
+    icon: "logo.svg",
+  },
+  google: {
+    title: "Google",
+    icon: "images/google.png",
+  },
+  drive: {
+    title: "My Drive - Google Drive",
+    icon: "images/drive.png",
+  },
+  classroom: {
+    title: "Classes",
+    icon: "images/classroom.png",
+  },
+  clever: {
+    title: "Clever | Portal",
+    icon: "images/clever.png",
+  },
+  grades: {
+    title: "Grades",
+    icon: "images/grades.png",
+  },
+  newtab: {
+    title: "New Tab",
+    icon: "educational site",
+  },
+};
+
+let currentCloak = cloakPresets.default;
+
+function openInAboutBlank(url) {
+  const targetUrl = url || window.location.href;
+
+  const win = window.open("about:blank", "_blank");
+  if (!win) {
+    alert("Please allow popups for tab cloaking to work.");
+    return;
+  }
+
+  const doc = win.document;
+
+  doc.title = currentCloak.title;
+
+  const link = doc.createElement("link");
+  link.rel = "icon";
+  link.type = "image/png";
+  link.href = currentCloak.icon;
+  doc.head.appendChild(link);
+
+  const iframe = doc.createElement("iframe");
+  iframe.src = targetUrl;
+
+  doc.body.style.margin = "0";
+  doc.body.style.padding = "0";
+  doc.body.style.overflow = "hidden";
+  doc.body.style.backgroundColor = "#000";
+
+  iframe.style.width = "100vw";
+  iframe.style.height = "100vh";
+  iframe.style.border = "none";
+  iframe.style.outline = "none";
+
+  doc.body.appendChild(iframe);
+  const redirectUrl =
+    localStorage.getItem("panicRedirectUrl") || "https://www.google.com";
+  window.location.replace(redirectUrl);
+}
+
+function loadPanicUrlSetting() {
+  const input = document.getElementById("panic-url-input");
+  if (!input) return;
+
+  const savedUrl = localStorage.getItem("panicRedirectUrl") || "";
+  input.value = savedUrl;
+}
+
+function savePanicUrlSetting() {
+  const input = document.getElementById("panic-url-input");
+  if (!input) return;
+
+  let url = input.value.trim();
+
+  if (url && !url.startsWith("http://") && !url.startsWith("https://")) {
+    url = "https://" + url;
+    input.value = url;
+  }
+
+  if (url) {
+    localStorage.setItem("panicRedirectUrl", url);
+  } else {
+    localStorage.removeItem("panicRedirectUrl");
+  }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  loadPanicUrlSetting();
+
+  const saveBtn = document.getElementById("save-panic-url-btn");
+  if (saveBtn) {
+    saveBtn.addEventListener("click", savePanicUrlSetting);
+  }
+});
+
 function getCategoryKey(game) {
   const filePath = game.file || game.url || "";
   if (filePath.indexOf("games/gn-math/") !== -1) return "GN-Math";
@@ -202,12 +308,53 @@ function closeGame() {
   document.body.style.overflow = "";
 }
 
+window.openSettings = function () {
+  const modal = document.getElementById("settings-modal");
+  if (modal) modal.classList.remove("hidden");
+};
+
+function closeSettings() {
+  const modal = document.getElementById("settings-modal");
+  if (modal) modal.classList.add("hidden");
+}
+
+function setTabCloak(presetKey) {
+  const preset = cloakPresets[presetKey] || cloakPresets.default;
+  currentCloak = preset;
+
+  document.title = preset.title;
+
+  let link = document.querySelector("link[rel*='icon']");
+  if (!link) {
+    link = document.createElement("link");
+    link.rel = "shortcut icon";
+    document.head.appendChild(link);
+  }
+  link.href = preset.icon;
+
+  localStorage.setItem("selectedCloak", presetKey);
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   const searchInput = document.getElementById("search-input");
   const categorySelect = document.getElementById("category-select");
   const closeBtn = document.getElementById("close-btn");
   const fullscreenBtn = document.getElementById("fullscreen-btn");
   const downloadBtn = document.getElementById("download-btn");
+  const closeSettingsBtn = document.getElementById("close-settings-btn");
+  const cloakSiteBtn = document.getElementById("cloak-site-btn");
+  const cloakGameBtn = document.getElementById("cloak-game-btn");
+  const cloakPresetSelect = document.getElementById("cloak-preset-select");
+
+  const savedCloak = localStorage.getItem("selectedCloak") || "default";
+  setTabCloak(savedCloak);
+
+  if (cloakPresetSelect) {
+    cloakPresetSelect.value = savedCloak;
+    cloakPresetSelect.addEventListener("change", (e) => {
+      setTabCloak(e.target.value);
+    });
+  }
 
   if (searchInput) searchInput.addEventListener("input", applyFilters);
   if (categorySelect) categorySelect.addEventListener("change", applyFilters);
@@ -238,16 +385,36 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  if (closeSettingsBtn)
+    closeSettingsBtn.addEventListener("click", closeSettings);
+
+  if (cloakSiteBtn) {
+    cloakSiteBtn.addEventListener("click", () => {
+      openInAboutBlank(window.location.href);
+    });
+  }
+
+  if (cloakGameBtn) {
+    cloakGameBtn.addEventListener("click", () => {
+      if (activeGameFile) {
+        openInAboutBlank(activeGameFile);
+      }
+    });
+  }
+
   loadAllGames();
 });
 
 window.addEventListener("keydown", (e) => {
   const gameModal = document.getElementById("game-modal");
-  if (
-    e.key === "Escape" &&
-    gameModal &&
-    !gameModal.classList.contains("hidden")
-  ) {
-    closeGame();
+  const settingsModal = document.getElementById("settings-modal");
+
+  if (e.key === "Escape") {
+    if (gameModal && !gameModal.classList.contains("hidden")) {
+      closeGame();
+    }
+    if (settingsModal && !settingsModal.classList.contains("hidden")) {
+      closeSettings();
+    }
   }
-}); //
+});
