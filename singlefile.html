@@ -7,6 +7,17 @@
         <title>Astral</title>
         <link rel="stylesheet" href="style.css" />
         <link rel="icon" type="image/svg+xml" href="logo.svg" />
+        <script>
+            window.openSettings = function () {
+                const modal = document.getElementById("settings-modal");
+                if (modal) modal.classList.remove("hidden");
+            };
+
+            window.closeSettings = function () {
+                const modal = document.getElementById("settings-modal");
+                if (modal) modal.classList.add("hidden");
+            };
+        </script>
     </head>
     <body>
         <div class="navbar">
