@@ -308,10 +308,10 @@ function closeGame() {
   document.body.style.overflow = "";
 }
 
-window.openSettings = function () {
+function openSettings() {
   const modal = document.getElementById("settings-modal");
   if (modal) modal.classList.remove("hidden");
-};
+}
 
 function closeSettings() {
   const modal = document.getElementById("settings-modal");
@@ -345,9 +345,14 @@ document.addEventListener("DOMContentLoaded", () => {
   const cloakSiteBtn = document.getElementById("cloak-site-btn");
   const cloakGameBtn = document.getElementById("cloak-game-btn");
   const cloakPresetSelect = document.getElementById("cloak-preset-select");
+  const settingsIcon = document.getElementById("settings-icon");
 
   const savedCloak = localStorage.getItem("selectedCloak") || "default";
   setTabCloak(savedCloak);
+
+  if (settingsIcon) {
+    settingsIcon.addEventListener(click, openSettings);
+  }
 
   if (cloakPresetSelect) {
     cloakPresetSelect.value = savedCloak;
