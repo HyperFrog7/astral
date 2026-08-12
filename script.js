@@ -286,7 +286,7 @@ async function loadAllGames() {
   }
 }
 
-function openGame(name, filePath) {
+async function openGame(name, filePath) {
   const gameModal = document.getElementById("game-modal");
   const gameFrame = document.getElementById("game-frame");
   const gameTitle = document.getElementById("game-modal-title");
@@ -295,7 +295,20 @@ function openGame(name, filePath) {
 
   activeGameFile = filePath;
   gameTitle.textContent = name;
-  gameFrame.src = filePath;
+
+  try {
+    const response = await fetch(filePath);
+    const html = await response.text();
+
+    const baseUrl = new URL(filePath, document.baseURI).href;
+    const cleanBaseUrl = baseUrl.substring(0, baseUrl.lastIndexOf("/") + 1);
+
+    gameFrame.srcdoc = `<base href="${cleanBaseUrl}">${html}`;
+  } catch (err) {
+    console.error("Failed to load game:", err);
+    gameFrame.src = filePath;
+  }
+
   gameModal.classList.remove("hidden");
   document.body.style.overflow = "hidden";
 }
