@@ -34,12 +34,22 @@ const cloakPresets = {
 
 let currentCloak = cloakPresets.default;
 
+window.openSettings = function () {
+  const modal = document.getElementById("settings-modal");
+  if (modal) modal.classList.remove("hidden");
+};
+
+window.closeSettings = function () {
+  const modal = document.getElementById("settings-modal");
+  if (modal) modal.classList.add("hidden");
+};
+
 function openInAboutBlank(url) {
   const targetUrl = url || window.location.href;
 
   const win = window.open("about:blank", "_blank");
   if (!win) {
-    alert("Please allow popups for tab cloaking to work.");
+    alert("Please allow popups for tab cloaking to work sonion.");
     return;
   }
 
@@ -97,15 +107,6 @@ function savePanicUrlSetting() {
     localStorage.removeItem("panicRedirectUrl");
   }
 }
-
-document.addEventListener("DOMContentLoaded", () => {
-  loadPanicUrlSetting();
-
-  const saveBtn = document.getElementById("save-panic-url-btn");
-  if (saveBtn) {
-    saveBtn.addEventListener("click", savePanicUrlSetting);
-  }
-});
 
 function getCategoryKey(game) {
   const filePath = game.file || game.url || "";
@@ -308,16 +309,6 @@ function closeGame() {
   document.body.style.overflow = "";
 }
 
-function openSettings() {
-  const modal = document.getElementById("settings-modal");
-  if (modal) modal.classList.remove("hidden");
-}
-
-function closeSettings() {
-  const modal = document.getElementById("settings-modal");
-  if (modal) modal.classList.add("hidden");
-}
-
 function setTabCloak(presetKey) {
   const preset = cloakPresets[presetKey] || cloakPresets.default;
   currentCloak = preset;
@@ -336,6 +327,13 @@ function setTabCloak(presetKey) {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+  loadPanicUrlSetting();
+
+  const saveBtn = document.getElementById("save-panic-url-btn");
+  if (saveBtn) {
+    saveBtn.addEventListener("click", savePanicUrlSetting);
+  }
+
   const searchInput = document.getElementById("search-input");
   const categorySelect = document.getElementById("category-select");
   const closeBtn = document.getElementById("close-btn");
@@ -351,7 +349,7 @@ document.addEventListener("DOMContentLoaded", () => {
   setTabCloak(savedCloak);
 
   if (settingsIcon) {
-    settingsIcon.addEventListener(click, openSettings);
+    settingsIcon.addEventListener("click", window.openSettings);
   }
 
   if (cloakPresetSelect) {
@@ -391,7 +389,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   if (closeSettingsBtn)
-    closeSettingsBtn.addEventListener("click", closeSettings);
+    closeSettingsBtn.addEventListener("click", window.closeSettings);
 
   if (cloakSiteBtn) {
     cloakSiteBtn.addEventListener("click", () => {
@@ -419,7 +417,7 @@ window.addEventListener("keydown", (e) => {
       closeGame();
     }
     if (settingsModal && !settingsModal.classList.contains("hidden")) {
-      closeSettings();
+      window.closeSettings();
     }
   }
 });
