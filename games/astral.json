@@ -1,0 +1,17 @@
+[
+  {
+    "name": "Eaglercraft 1.12.2",
+    "icon": "images/icons/eagler1-12-2.png",
+    "file": "games/eagler1-12-2.html"
+  },
+  {
+    "name": "Geometry Dash",
+    "icon": "images/icons/geometry-dash.png",
+    "file": "games/geometry-dash.html"
+  },
+  {
+    "name": "Brotato",
+    "icon": "images/icons/brotato.jpg",
+    "file": "games/brotato.html"
+  }
+]

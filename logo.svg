@@ -1,0 +1,20 @@
+<svg class="astral-logo" width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="planetGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#e0e1dd"/>
+      <stop offset="100%" stop-color="#1b263b"/>
+    </linearGradient>
+    <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#778da9"/>
+      <stop offset="50%" stop-color="#e0e1dd"/>
+      <stop offset="100%" stop-color="#415a77"/>
+    </linearGradient>
+  </defs>
+  <g transform="rotate(-38 256 256)">
+    <ellipse cx="256" cy="256" rx="230" ry="75" stroke="url(#ringGrad)" stroke-width="32" fill="none"/>
+  </g>
+  <circle cx="256" cy="256" r="125" fill="url(#planetGrad)"/>
+  <g transform="rotate(-38 256 256)">
+    <path d="M 26 256 A 230 75 0 0 0 486 256" stroke="url(#ringGrad)" stroke-width="32" fill="none" stroke-linecap="round"/>
+  </g>
+</svg>

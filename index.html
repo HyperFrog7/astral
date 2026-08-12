@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Astral</title>
+        <link rel="stylesheet" href="style.css" />
+        <link rel="icon" type="image/svg+xml" href="logo.svg" />
+    </head>
+    <body>
+        <div class="navbar">
+            <div class="navbar-start">
+                <img width="48" height="48" src="logo.svg" />
+                <h1 class="title">Astral</h1>
+            </div>
+            <div class="navbar-center">
+                <div class="navbar-search">
+                    <img id="search-icon" src="images/search.svg" />
+                    <input
+                        id="search-input"
+                        type="text"
+                        placeholder="Search..."
+                        oninput="searchGames()"
+                    />
+                    <div id="categoryDropdown">
+                        <select
+                            id="category-select"
+                            onchange="changeCategory()"
+                        >
+                            <option value="all">All games</option>
+                            <option value="astral">Astral</option>
+                            <option value="gn-math">GN-Math</option>
+                            <option value="ugs">UGS</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="navbar-end">
+                <img
+                    id="settings-icon"
+                    src="images/settings.svg"
+                    onclick="openSettings()"
+                />
+            </div>
+        </div>
+
+        <main class="game-grid" id="game-grid"></main>
+
+        <div id="game-modal" class="game-modal hidden">
+            <div class="game-modal-header">
+                <span id="game-modal-title" class="game-modal-title"
+                    >Game Title</span
+                >
+                <div class="game-modal-controls">
+                    <button id="fullscreen-btn">Fullscreen</button>
+                    <button id="download-btn">Download</button>
+                    <button id="close-btn" class="close-btn">Close</button>
+                </div>
+            </div>
+            <iframe
+                id="game-frame"
+                src=""
+                frameborder="0"
+                allowfullscreen
+            ></iframe>
+        </div>
+        <script src="script.js" defer></script>
+    </body>
+</html>
