@@ -307,31 +307,32 @@ async function openGame(gameParam, fallbackPath) {
   activeGameFile = filePath;
   gameTitle.textContent = name || "Untitled Game";
 
-  const isGnMath = filePath.indexOf("games/gn-math/") !== -1;
+  gameFrame.src = "about:blank";
 
-  if (isGnMath) {
-    gameFrame.src = "about:blank";
+  try {
+    const response = await fetch(filePath);
+    const html = await response.text();
 
-    try {
-      const response = await fetch(filePath);
-      const html = await response.text();
+    const isGnMath = filePath.indexOf("games/gn-math/") !== -1;
+    const fullPath = new URL(filePath, document.baseURI).href;
 
-      const fullPath = new URL(filePath, window.location.href).href;
-      const gnMathBaseUrl = fullPath.substring(
+    let baseUrl;
+    if (isGnMath) {
+      baseUrl = fullPath.substring(
         0,
         fullPath.indexOf("games/gn-math/") + "games/gn-math/".length,
       );
-
-      const frameDoc =
-        gameFrame.contentDocument || gameFrame.contentWindow.document;
-      frameDoc.open();
-      frameDoc.write(`<base href="${gnMathBaseUrl}">${html}`);
-      frameDoc.close();
-    } catch (err) {
-      console.error("Failed to load GN-Math game:", err);
-      gameFrame.src = filePath;
+    } else {
+      baseUrl = fullPath.substring(0, fullPath.lastIndexOf("/") + 1);
     }
-  } else {
+
+    const frameDoc =
+      gameFrame.contentDocument || gameFrame.contentWindow.document;
+    frameDoc.open();
+    frameDoc.write(`<base href="${baseUrl}">${html}`);
+    frameDoc.close();
+  } catch (err) {
+    console.error("Failed to load game:", err);
     gameFrame.src = filePath;
   }
 
