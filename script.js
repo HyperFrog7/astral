@@ -286,7 +286,7 @@ async function loadAllGames() {
   }
 }
 
-async function openGame(gameParam, fallbackPath) {
+function openGame(gameParam, fallbackPath) {
   const gameModal = document.getElementById("game-modal");
   const gameFrame = document.getElementById("game-frame");
   const gameTitle = document.getElementById("game-modal-title");
@@ -307,34 +307,7 @@ async function openGame(gameParam, fallbackPath) {
   activeGameFile = filePath;
   gameTitle.textContent = name || "Untitled Game";
 
-  try {
-    const response = await fetch(filePath + "?t=" + Date.now());
-    const html = await response.text();
-
-    const fullPath = new URL(filePath, document.baseURI).href;
-    const isGnMath = filePath.indexOf("games/gn-math/") !== -1;
-
-    let baseUrl;
-    if (isGnMath) {
-      baseUrl = fullPath.substring(
-        0,
-        fullPath.indexOf("games/gn-math/") + "games/gn-math/".length,
-      );
-    } else {
-      baseUrl = fullPath.substring(0, fullPath.lastIndexOf("/") + 1);
-    }
-
-    const htmlWithBase = `<base href="${baseUrl}">${html}`;
-
-    const frameDoc =
-      gameFrame.contentDocument || gameFrame.contentWindow.document;
-    frameDoc.open();
-    frameDoc.write(htmlWithBase);
-    frameDoc.close();
-  } catch (err) {
-    console.error("Failed to load game HTML:", err);
-    gameFrame.src = filePath;
-  }
+  gameFrame.src = filePath;
 
   gameModal.classList.remove("hidden");
   document.body.style.overflow = "hidden";
