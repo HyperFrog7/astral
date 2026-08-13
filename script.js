@@ -207,7 +207,7 @@ function renderCategorizedGames(gamesList) {
 
       card.addEventListener("click", (e) => {
         e.preventDefault();
-        openGame(name, gameLink);
+        openGame(game);
       });
 
       grid.appendChild(card);
@@ -286,26 +286,52 @@ async function loadAllGames() {
   }
 }
 
-async function openGame(name, filePath) {
+async function openGame(gameParam, fallbackPath) {
   const gameModal = document.getElementById("game-modal");
   const gameFrame = document.getElementById("game-frame");
   const gameTitle = document.getElementById("game-modal-title");
 
   if (!gameModal || !gameFrame || !gameTitle) return;
 
+  const name =
+    typeof gameParam === "object"
+      ? gameParam.name || gameParam.title
+      : gameParam;
+  const filePath =
+    typeof gameParam === "object"
+      ? gameParam.file || gameParam.url
+      : fallbackPath;
+
+  if (!filePath) return;
+
   activeGameFile = filePath;
-  gameTitle.textContent = name;
+  gameTitle.textContent = name || "Untitled Game";
 
-  try {
-    const response = await fetch(filePath);
-    const html = await response.text();
+  const isGnMath = filePath.indexOf("games/gn-math/") !== -1;
 
-    const baseUrl = new URL(filePath, document.baseURI).href;
-    const cleanBaseUrl = baseUrl.substring(0, baseUrl.lastIndexOf("/") + 1);
+  if (isGnMath) {
+    gameFrame.src = "about:blank";
 
-    gameFrame.srcdoc = `<base href="${cleanBaseUrl}">${html}`;
-  } catch (err) {
-    console.error("Failed to load game:", err);
+    try {
+      const response = await fetch(filePath);
+      const html = await response.text();
+
+      const fullPath = new URL(filePath, window.location.href).href;
+      const gnMathBaseUrl = fullPath.substring(
+        0,
+        fullPath.indexOf("games/gn-math/") + "games/gn-math/".length,
+      );
+
+      const frameDoc =
+        gameFrame.contentDocument || gameFrame.contentWindow.document;
+      frameDoc.open();
+      frameDoc.write(`<base href="${gnMathBaseUrl}">${html}`);
+      frameDoc.close();
+    } catch (err) {
+      console.error("Failed to load GN-Math game:", err);
+      gameFrame.src = filePath;
+    }
+  } else {
     gameFrame.src = filePath;
   }
 
@@ -318,7 +344,8 @@ function closeGame() {
   const gameFrame = document.getElementById("game-frame");
 
   if (gameModal) gameModal.classList.add("hidden");
-  if (gameFrame) gameFrame.src = "";
+  if (gameFrame) gameFrame.src = "about:blank";
+
   document.body.style.overflow = "";
 }
 
