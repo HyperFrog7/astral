@@ -286,7 +286,7 @@ async function loadAllGames() {
   }
 }
 
-async function openGame(gameParam, fallbackPath) {
+function openGame(gameParam, fallbackPath) {
   const gameModal = document.getElementById("game-modal");
   const gameFrame = document.getElementById("game-frame");
   const gameTitle = document.getElementById("game-modal-title");
@@ -307,52 +307,20 @@ async function openGame(gameParam, fallbackPath) {
   activeGameFile = filePath;
   gameTitle.textContent = name || "Untitled Game";
 
-  let targetUrl = filePath;
   if (window.location.protocol === "file:" && !filePath.startsWith("http")) {
-    targetUrl =
-      "https://cdn.jsdelivr.net/gh/hyperfrog7/Astral@main/" + filePath;
-  }
-
-  try {
-    const response = await fetch(targetUrl);
-    const htmlText = await response.text();
-
-    let baseUrl;
-
     if (
       typeof gameParam === "object" &&
       gameParam.id &&
       filePath.includes("gn-math")
     ) {
-      baseUrl = `https://cdn.jsdelivr.net/gh/hyperfrog7/Astral@main/games/gn-math/assets/${gameParam.id}/`;
+      filePath = `https://cdn.jsdelivr.net/gh/hyperfrog7/Astral@main/games/gn-math/assets/${gameParam.id}/index.html`;
     } else {
-      baseUrl = targetUrl.substring(0, targetUrl.lastIndexOf("/") + 1);
+      filePath =
+        "https://cdn.jsdelivr.net/gh/hyperfrog7/Astral@main/" + filePath;
     }
-
-    const baseTag = `<base href="${baseUrl}">`;
-    let htmlWithBase;
-
-    if (htmlText.includes("<head>")) {
-      htmlWithBase = htmlText.replace("<head>", `<head>${baseTag}`);
-    } else if (htmlText.includes("<HEAD>")) {
-      htmlWithBase = htmlText.replace("<HEAD>", `<HEAD>${baseTag}`);
-    } else {
-      htmlWithBase = `${baseTag}${htmlText}`;
-    }
-
-    const blob = new Blob([htmlWithBase], { type: "text/html" });
-
-    if (gameFrame.dataset.blobUrl) {
-      URL.revokeObjectURL(gameFrame.dataset.blobUrl);
-    }
-
-    const blobUrl = URL.createObjectURL(blob);
-    gameFrame.dataset.blobUrl = blobUrl;
-    gameFrame.src = blobUrl;
-  } catch (err) {
-    console.error("Failed to load game via Blob:", err);
-    gameFrame.src = targetUrl;
   }
+
+  gameFrame.src = filePath;
 
   gameModal.classList.remove("hidden");
   document.body.style.overflow = "hidden";
