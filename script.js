@@ -329,7 +329,16 @@ async function openGame(gameParam, fallbackPath) {
       baseUrl = targetUrl.substring(0, targetUrl.lastIndexOf("/") + 1);
     }
 
-    const htmlWithBase = `<base href="${baseUrl}">${htmlText}`;
+    const baseTag = `<base href="${baseUrl}">`;
+    let htmlWithBase;
+
+    if (htmlText.includes("<head>")) {
+      htmlWithBase = htmlText.replace("<head>", `<head>${baseTag}`);
+    } else if (htmlText.includes("<HEAD>")) {
+      htmlWithBase = htmlText.replace("<HEAD>", `<HEAD>${baseTag}`);
+    } else {
+      htmlWithBase = `${baseTag}${htmlText}`;
+    }
 
     const blob = new Blob([htmlWithBase], { type: "text/html" });
 
