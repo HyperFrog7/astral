@@ -286,7 +286,7 @@ async function loadAllGames() {
   }
 }
 
-async function openGame(gameParam, fallbackPath) {
+function openGame(gameParam, fallbackPath) {
   const gameModal = document.getElementById("game-modal");
   const gameFrame = document.getElementById("game-frame");
   const gameTitle = document.getElementById("game-modal-title");
@@ -307,39 +307,7 @@ async function openGame(gameParam, fallbackPath) {
   activeGameFile = filePath;
   gameTitle.textContent = name || "Untitled Game";
 
-  try {
-    const response = await fetch(filePath);
-    const html = await response.text();
-
-    const isGnMath = filePath.indexOf("games/gn-math/") !== -1;
-    const fullPath = new URL(filePath, document.baseURI).href;
-
-    let baseUrl;
-    if (isGnMath) {
-      baseUrl = fullPath.substring(
-        0,
-        fullPath.indexOf("games/gn-math/") + "games/gn-math/".length,
-      );
-    } else {
-      baseUrl = fullPath.substring(0, fullPath.lastIndexOf("/") + 1);
-    }
-
-    const htmlWithBase = `<base href="${baseUrl}">${html}`;
-
-    const blob = new Blob([htmlWithBase], { type: "text/html" });
-
-    if (gameFrame.dataset.blobUrl) {
-      URL.revokeObjectURL(gameFrame.dataset.blobUrl);
-    }
-
-    const blobUrl = URL.createObjectURL(blob);
-    gameFrame.dataset.blobUrl = blobUrl;
-
-    gameFrame.src = blobUrl;
-  } catch (err) {
-    console.error("Failed to load game:", err);
-    gameFrame.src = filePath;
-  }
+  gameFrame.src = filePath;
 
   gameModal.classList.remove("hidden");
   document.body.style.overflow = "hidden";
