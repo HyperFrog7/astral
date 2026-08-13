@@ -286,7 +286,7 @@ async function loadAllGames() {
   }
 }
 
-function openGame(gameParam, fallbackPath) {
+async function openGame(gameParam, fallbackPath) {
   const gameModal = document.getElementById("game-modal");
   const gameFrame = document.getElementById("game-frame");
   const gameTitle = document.getElementById("game-modal-title");
@@ -311,7 +311,23 @@ function openGame(gameParam, fallbackPath) {
     filePath = "https://cdn.jsdelivr.net/gh/hyperfrog7/Astral@main/" + filePath;
   }
 
-  gameFrame.src = filePath;
+  try {
+    const response = await fetch(filePath);
+    const htmlText = await response.text();
+
+    const blob = new Blob([htmlText], { type: "text/html" });
+
+    if (gameFrame.dataset.blobUrl) {
+      URL.revokeObjectURL(gameFrame.dataset.blobUrl);
+    }
+
+    const blobUrl = URL.createObjectURL(blob);
+    gameFrame.dataset.blobUrl = blobUrl;
+    gameFrame.src = blobUrl;
+  } catch (err) {
+    console.error("Failed to load game via Blob:", err);
+    gameFrame.src = filePath;
+  }
 
   gameModal.classList.remove("hidden");
   document.body.style.overflow = "hidden";
