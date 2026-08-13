@@ -297,7 +297,7 @@ function openGame(gameParam, fallbackPath) {
     typeof gameParam === "object"
       ? gameParam.name || gameParam.title
       : gameParam;
-  const filePath =
+  let filePath =
     typeof gameParam === "object"
       ? gameParam.file || gameParam.url
       : fallbackPath;
@@ -306,6 +306,10 @@ function openGame(gameParam, fallbackPath) {
 
   activeGameFile = filePath;
   gameTitle.textContent = name || "Untitled Game";
+
+  if (window.location.protocol === "file:" && !filePath.startsWith("http")) {
+    filePath = "https://cdn.jsdelivr.net/gh/hyperfrog7/Astral@main/" + filePath;
+  }
 
   gameFrame.src = filePath;
 
