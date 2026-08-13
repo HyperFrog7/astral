@@ -307,8 +307,6 @@ async function openGame(gameParam, fallbackPath) {
   activeGameFile = filePath;
   gameTitle.textContent = name || "Untitled Game";
 
-  gameFrame.src = "about:blank";
-
   try {
     const response = await fetch(filePath);
     const html = await response.text();
@@ -326,11 +324,18 @@ async function openGame(gameParam, fallbackPath) {
       baseUrl = fullPath.substring(0, fullPath.lastIndexOf("/") + 1);
     }
 
-    const frameDoc =
-      gameFrame.contentDocument || gameFrame.contentWindow.document;
-    frameDoc.open();
-    frameDoc.write(`<base href="${baseUrl}">${html}`);
-    frameDoc.close();
+    const htmlWithBase = `<base href="${baseUrl}">${html}`;
+
+    const blob = new Blob([htmlWithBase], { type: "text/html" });
+
+    if (gameFrame.dataset.blobUrl) {
+      URL.revokeObjectURL(gameFrame.dataset.blobUrl);
+    }
+
+    const blobUrl = URL.createObjectURL(blob);
+    gameFrame.dataset.blobUrl = blobUrl;
+
+    gameFrame.src = blobUrl;
   } catch (err) {
     console.error("Failed to load game:", err);
     gameFrame.src = filePath;
@@ -345,7 +350,13 @@ function closeGame() {
   const gameFrame = document.getElementById("game-frame");
 
   if (gameModal) gameModal.classList.add("hidden");
-  if (gameFrame) gameFrame.src = "about:blank";
+  if (gameFrame) {
+    if (gameFrame.dataset.blobUrl) {
+      URL.revokeObjectURL(gameFrame.dataset.blobUrl);
+      delete gameFrame.dataset.blobUrl;
+    }
+    gameFrame.src = "about:blank";
+  }
 
   document.body.style.overflow = "";
 }
