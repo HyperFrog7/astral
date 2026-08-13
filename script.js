@@ -307,15 +307,31 @@ async function openGame(gameParam, fallbackPath) {
   activeGameFile = filePath;
   gameTitle.textContent = name || "Untitled Game";
 
+  let targetUrl = filePath;
   if (window.location.protocol === "file:" && !filePath.startsWith("http")) {
-    filePath = "https://cdn.jsdelivr.net/gh/hyperfrog7/Astral@main/" + filePath;
+    targetUrl =
+      "https://cdn.jsdelivr.net/gh/hyperfrog7/Astral@main/" + filePath;
   }
 
   try {
-    const response = await fetch(filePath);
+    const response = await fetch(targetUrl);
     const htmlText = await response.text();
 
-    const blob = new Blob([htmlText], { type: "text/html" });
+    let baseUrl;
+
+    if (
+      typeof gameParam === "object" &&
+      gameParam.id &&
+      filePath.includes("gn-math")
+    ) {
+      baseUrl = `https://cdn.jsdelivr.net/gh/hyperfrog7/Astral@main/games/gn-math/assets/${gameParam.id}/`;
+    } else {
+      baseUrl = targetUrl.substring(0, targetUrl.lastIndexOf("/") + 1);
+    }
+
+    const htmlWithBase = `<base href="${baseUrl}">${htmlText}`;
+
+    const blob = new Blob([htmlWithBase], { type: "text/html" });
 
     if (gameFrame.dataset.blobUrl) {
       URL.revokeObjectURL(gameFrame.dataset.blobUrl);
@@ -326,7 +342,7 @@ async function openGame(gameParam, fallbackPath) {
     gameFrame.src = blobUrl;
   } catch (err) {
     console.error("Failed to load game via Blob:", err);
-    gameFrame.src = filePath;
+    gameFrame.src = targetUrl;
   }
 
   gameModal.classList.remove("hidden");
