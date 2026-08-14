@@ -286,7 +286,7 @@ async function loadAllGames() {
   }
 }
 
-function openGame(gameParam, fallbackPath) {
+async function openGame(gameParam, fallbackPath) {
   const gameModal = document.getElementById("game-modal");
   const gameFrame = document.getElementById("game-frame");
   const gameTitle = document.getElementById("game-modal-title");
@@ -304,24 +304,22 @@ function openGame(gameParam, fallbackPath) {
 
   if (!filePath) return;
 
-  activeGameFile = filePath;
   gameTitle.textContent = name || "Untitled Game";
 
+  let targetUrl = filePath;
   if (window.location.protocol === "file:" && !filePath.startsWith("http")) {
-    if (
-      typeof gameParam === "object" &&
-      gameParam.id &&
-      filePath.includes("gn-math") &&
-      !filePath.endsWith(".html")
-    ) {
-      filePath = `https://cdn.jsdelivr.net/gh/hyperfrog7/Astral@main/games/gn-math/assets/${gameParam.id}/index.html`;
-    } else {
-      filePath =
-        "https://cdn.jsdelivr.net/gh/hyperfrog7/Astral@main/" + filePath;
-    }
+    targetUrl = `https://cdn.jsdelivr.net/gh/hyperfrog7/Astral@main/${filePath}`;
   }
 
-  gameFrame.src = filePath;
+  try {
+    const response = await fetch(targetUrl + "?t=" + Date.now());
+    const htmlContent = await response.text();
+
+    gameFrame.srcdoc = htmlContent;
+  } catch (err) {
+    console.error("Failed to load game via GN-Math method:", err);
+    gameFrame.src = targetUrl;
+  }
 
   gameModal.classList.remove("hidden");
   document.body.style.overflow = "hidden";
