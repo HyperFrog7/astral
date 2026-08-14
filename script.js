@@ -311,7 +311,8 @@ function openGame(gameParam, fallbackPath) {
     if (
       typeof gameParam === "object" &&
       gameParam.id &&
-      filePath.includes("gn-math")
+      filePath.includes("gn-math") &&
+      !filePath.endsWith(".html")
     ) {
       filePath = `https://cdn.jsdelivr.net/gh/hyperfrog7/Astral@main/games/gn-math/assets/${gameParam.id}/index.html`;
     } else {
