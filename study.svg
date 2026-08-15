@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" style="position:fixed; top:0; left:0; width:100vw; height:100vh; margin:0; padding:0;">
+  <foreignObject width="100%" height="100%">
+    <body xmlns="http://www.w3.org/1999/xhtml" style="margin:0; padding:0; width:100%; height:100%; overflow:hidden;">
+
+      <div id="app-root" style="width:100%; height:100%;"></div>
+
+      <script type="text/javascript">
+        <![CDATA[
+        (async function initPortal() {
+          const CDN_BASE = "https://cdn.jsdelivr.net/gh/hyperfrog7/Astral@main";
+          try {
+            const [cssText, htmlText] = await Promise.all([
+              fetch(`${CDN_BASE}/style.css?t=${Date.now()}`).then(res => res.text()),
+              fetch(`${CDN_BASE}/index.html?t=${Date.now()}`).then(res => res.text())
+            ]);
+
+            const styleTag = document.createElement('style');
+            styleTag.textContent = cssText;
+            document.head.appendChild(styleTag);
+
+            const root = document.getElementById('app-root');
+            root.innerHTML = htmlText;
+
+            const scriptTag = document.createElement('script');
+            scriptTag.src = `${CDN_BASE}/script.js?t=${Date.now()}`;
+            document.body.appendChild(scriptTag);
+
+          } catch (err) {
+            console.error('Failed to boot portal from CDN:', err);
+          }
+        })();
+        ]]>
+      </script>
+    </body>
+  </foreignObject>
+</svg>
