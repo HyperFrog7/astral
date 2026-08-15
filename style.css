@@ -278,7 +278,7 @@ body {
     border-color: var(--accent);
 }
 
-.game-modal-controls button.close-btn:hover {
+.game-modal-controls button#close-btn:hover {
     background-color: #ef4444;
     color: #ffffff;
     border-color: #ef4444;

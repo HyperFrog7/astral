@@ -1,6 +1,9 @@
 let allGames = [];
 let activeGameFile = "";
 
+const RECENT_KEY = "astral_recent_games";
+const FAVORITES_KEY = "astral_favorite_games";
+
 const cloakPresets = {
   default: {
     title: "Astral",
@@ -34,6 +37,51 @@ const cloakPresets = {
 
 let currentCloak = cloakPresets.default;
 
+function getFavorites() {
+  return JSON.parse(localStorage.getItem(FAVORITES_KEY)) || [];
+}
+
+function getRecents() {
+  return JSON.parse(localStorage.getItem(RECENT_KEY)) || [];
+}
+
+function addRecentlyPlayed(game) {
+  if (!game) return;
+  let recents = getRecents();
+  const gameId = game.file || game.url || game.name;
+
+  recents = recents.filter(
+    (item) => (item.file || item.url || item.name) !== gameId,
+  );
+  recents.unshift(game);
+
+  if (recents.length > 6) recents.pop();
+
+  localStorage.setItem(RECENT_KEY, JSON.stringify(recents));
+}
+
+function toggleFavorite(game, event) {
+  if (event) {
+    event.preventDefault();
+    event.stopPropagation();
+  }
+
+  let favorites = getFavorites();
+  const gameId = game.file || game.url || game.name;
+  const index = favorites.findIndex(
+    (item) => (item.file || item.url || item.name) === gameId,
+  );
+
+  if (index > -1) {
+    favorites.splice(index, 1);
+  } else {
+    favorites.push(game);
+  }
+
+  localStorage.setItem(FAVORITES_KEY, JSON.stringify(favorites));
+  applyFilters(); // Re-render categories to reflect changes
+}
+
 window.openSettings = function () {
   const modal = document.getElementById("settings-modal");
   if (modal) modal.classList.remove("hidden");
@@ -54,7 +102,6 @@ function openInAboutBlank(url) {
   }
 
   const doc = win.document;
-
   doc.title = currentCloak.title;
 
   const link = doc.createElement("link");
@@ -143,7 +190,81 @@ function updateCategoryDropdown() {
   `;
 }
 
-function renderCategorizedGames(gamesList) {
+function renderCategorySection(container, title, gamesList) {
+  if (!gamesList || gamesList.length === 0) return;
+
+  const favorites = getFavorites();
+  const section = document.createElement("div");
+  section.className = "category-section";
+
+  const header = document.createElement("div");
+  header.className = "category-header";
+  header.innerHTML = `
+    <span>${title} (${gamesList.length})</span>
+    <span class="toggle-icon">−</span>
+  `;
+
+  const grid = document.createElement("div");
+  grid.className = "category-grid";
+
+  header.addEventListener("click", () => {
+    const isCollapsed = grid.classList.toggle("collapsed");
+    const icon = header.querySelector(".toggle-icon");
+    if (icon) {
+      icon.textContent = isCollapsed ? "+" : "−";
+    }
+  });
+
+  gamesList.forEach((game) => {
+    const name = game.name || game.title || "Untitled Game";
+    let imageSrc = game.icon || game.cover || "";
+
+    if (imageSrc.indexOf("/") === 0) {
+      imageSrc = imageSrc.substring(1);
+    }
+
+    const gameId = game.file || game.url || game.name;
+    const isFav = favorites.some(
+      (item) => (item.file || item.url || item.name) === gameId,
+    );
+
+    const card = document.createElement("a");
+    card.className = "game-card";
+    card.href = "#";
+
+    card.innerHTML = `
+      <button class="fav-btn ${isFav ? "active" : ""}" title="${isFav ? "Unfavorite" : "Favorite"}">
+        ${isFav ? "★" : "☆"}
+      </button>
+      <img
+        src="${imageSrc}"
+        alt="${name}"
+        class="game-icon"
+        loading="lazy"
+        onerror="this.style.display='none';"
+      />
+      <h3 class="game-title">${name}</h3>
+    `;
+
+    const favBtn = card.querySelector(".fav-btn");
+    if (favBtn) {
+      favBtn.addEventListener("click", (e) => toggleFavorite(game, e));
+    }
+
+    card.addEventListener("click", (e) => {
+      e.preventDefault();
+      openGame(game);
+    });
+
+    grid.appendChild(card);
+  });
+
+  section.appendChild(header);
+  section.appendChild(grid);
+  container.appendChild(section);
+}
+
+function renderCategorizedGames(gamesList, isFiltered = false) {
   const container = document.getElementById("game-grid");
   if (!container) return;
 
@@ -154,68 +275,17 @@ function renderCategorizedGames(gamesList) {
     return;
   }
 
+  if (!isFiltered) {
+    const recents = getRecents();
+    const favorites = getFavorites();
+
+    renderCategorySection(container, "Recently Played", recents);
+    renderCategorySection(container, "Favorites", favorites);
+  }
+
   const grouped = groupGamesByCategory(gamesList);
-
   Object.keys(grouped).forEach((categoryName) => {
-    const gamesInCat = grouped[categoryName];
-    if (!gamesInCat || gamesInCat.length === 0) return;
-
-    const section = document.createElement("div");
-    section.className = "category-section";
-
-    const header = document.createElement("div");
-    header.className = "category-header";
-    header.innerHTML = `
-      <span>${categoryName} (${gamesInCat.length})</span>
-      <span class="toggle-icon">−</span>
-    `;
-
-    const grid = document.createElement("div");
-    grid.className = "category-grid";
-
-    header.addEventListener("click", () => {
-      const isCollapsed = grid.classList.toggle("collapsed");
-      const icon = header.querySelector(".toggle-icon");
-      if (icon) {
-        icon.textContent = isCollapsed ? "+" : "−";
-      }
-    });
-
-    gamesInCat.forEach((game) => {
-      const name = game.name || game.title || "Untitled Game";
-      let imageSrc = game.icon || game.cover || "";
-      const gameLink = game.file || game.url || "#";
-
-      if (imageSrc.indexOf("/") === 0) {
-        imageSrc = imageSrc.substring(1);
-      }
-
-      const card = document.createElement("a");
-      card.className = "game-card";
-      card.href = "#";
-
-      card.innerHTML = `
-        <img
-          src="${imageSrc}"
-          alt="${name}"
-          class="game-icon"
-          loading="lazy"
-          onerror="this.style.display='none';"
-        />
-        <h3 class="game-title">${name}</h3>
-      `;
-
-      card.addEventListener("click", (e) => {
-        e.preventDefault();
-        openGame(game);
-      });
-
-      grid.appendChild(card);
-    });
-
-    section.appendChild(header);
-    section.appendChild(grid);
-    container.appendChild(section);
+    renderCategorySection(container, categoryName, grouped[categoryName]);
   });
 }
 
@@ -229,6 +299,8 @@ function applyFilters() {
       : "";
   const selectedCategory =
     categorySelect && categorySelect.value ? categorySelect.value : "all";
+
+  const isFiltered = query !== "" || selectedCategory !== "all";
 
   const matched = allGames.filter((game) => {
     if (!game) return false;
@@ -255,7 +327,7 @@ function applyFilters() {
     return matchesSearch && matchesCategory;
   });
 
-  renderCategorizedGames(matched);
+  renderCategorizedGames(matched, isFiltered);
 }
 
 window.searchGames = function () {
@@ -280,7 +352,7 @@ async function loadAllGames() {
     allGames = [...astralGames, ...gnMathGames, ...ugsGames];
 
     updateCategoryDropdown();
-    renderCategorizedGames(allGames);
+    renderCategorizedGames(allGames, false);
   } catch (error) {
     console.error("Error loading games:", error);
   }
@@ -293,17 +365,19 @@ async function openGame(gameParam, fallbackPath) {
 
   if (!gameModal || !gameFrame || !gameTitle) return;
 
-  const name =
+  const gameObj =
     typeof gameParam === "object"
-      ? gameParam.name || gameParam.title
-      : gameParam;
-  let filePath =
-    typeof gameParam === "object"
-      ? gameParam.file || gameParam.url
-      : fallbackPath;
+      ? gameParam
+      : { name: gameParam, file: fallbackPath };
+  const name = gameObj.name || gameObj.title;
+  let filePath = gameObj.file || gameObj.url;
 
   if (!filePath) return;
 
+  addRecentlyPlayed(gameObj);
+  applyFilters();
+
+  activeGameFile = filePath;
   gameTitle.textContent = name || "Untitled Game";
 
   let targetUrl = filePath;
@@ -317,7 +391,7 @@ async function openGame(gameParam, fallbackPath) {
 
     gameFrame.srcdoc = htmlContent;
   } catch (err) {
-    console.error("Failed to load game via GN-Math method:", err);
+    console.error("Failed to load game via fetch method:", err);
     gameFrame.src = targetUrl;
   }
 
