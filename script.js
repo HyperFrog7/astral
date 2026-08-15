@@ -3,6 +3,24 @@ let activeGameFile = "";
 
 const RECENT_KEY = "astral_recent_games";
 const FAVORITES_KEY = "astral_favorite_games";
+const COLLAPSED_KEY = "astral_collapsed_categories";
+
+function getCollapsedCategories() {
+  return JSON.parse(localStorage.getItem(COLLAPSED_KEY)) || [];
+}
+
+function toggleCollapsedCategory(categoryTitle) {
+  let collapsed = getCollapsedCategories();
+  const index = collapsed.indexOf(categoryTitle);
+
+  if (index > -1) {
+    collapsed.splice(index, 1);
+  } else {
+    collapsed.push(categoryTitle);
+  }
+
+  localStorage.setItem(COLLAPSED_KEY, JSON.stringify(collapsed));
+}
 
 const cloakPresets = {
   default: {
@@ -79,7 +97,7 @@ function toggleFavorite(game, event) {
   }
 
   localStorage.setItem(FAVORITES_KEY, JSON.stringify(favorites));
-  applyFilters(); // Re-render categories to reflect changes
+  applyFilters();
 }
 
 window.openSettings = function () {
@@ -257,6 +275,12 @@ function renderCategorySection(container, title, gamesList) {
     });
 
     grid.appendChild(card);
+  });
+
+  section.appendChild(header);
+  section.appendChild(grid);
+  container.appendChild(section);
+}    grid.appendChild(card);
   });
 
   section.appendChild(header);
