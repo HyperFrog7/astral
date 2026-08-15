@@ -212,6 +212,9 @@ function renderCategorySection(container, title, gamesList) {
   if (!gamesList || gamesList.length === 0) return;
 
   const favorites = getFavorites();
+  const collapsedList = getCollapsedCategories();
+  const isInitiallyCollapsed = collapsedList.includes(title);
+
   const section = document.createElement("div");
   section.className = "category-section";
 
@@ -219,11 +222,14 @@ function renderCategorySection(container, title, gamesList) {
   header.className = "category-header";
   header.innerHTML = `
     <span>${title} (${gamesList.length})</span>
-    <span class="toggle-icon">−</span>
+    <span class="toggle-icon">${isInitiallyCollapsed ? "+" : "−"}</span>
   `;
 
   const grid = document.createElement("div");
   grid.className = "category-grid";
+  if (isInitiallyCollapsed) {
+    grid.classList.add("collapsed");
+  }
 
   header.addEventListener("click", () => {
     const isCollapsed = grid.classList.toggle("collapsed");
@@ -231,6 +237,7 @@ function renderCategorySection(container, title, gamesList) {
     if (icon) {
       icon.textContent = isCollapsed ? "+" : "−";
     }
+    toggleCollapsedCategory(title);
   });
 
   gamesList.forEach((game) => {
@@ -275,12 +282,6 @@ function renderCategorySection(container, title, gamesList) {
     });
 
     grid.appendChild(card);
-  });
-
-  section.appendChild(header);
-  section.appendChild(grid);
-  container.appendChild(section);
-}    grid.appendChild(card);
   });
 
   section.appendChild(header);
