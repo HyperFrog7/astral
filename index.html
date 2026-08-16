@@ -6,6 +6,17 @@
         <title>Astral</title>
         <link rel="stylesheet" href="style.css" />
         <link rel="icon" type="image/svg+xml" href="logo.svg" />
+        <script>
+            window.openSettings = function () {
+                const modal = document.getElementById("settings-modal");
+                if (modal) modal.classList.remove("hidden");
+            };
+
+            window.closeSettings = function () {
+                const modal = document.getElementById("settings-modal");
+                if (modal) modal.classList.add("hidden");
+            };
+        </script>
     </head>
     <body>
         <div class="navbar">
@@ -31,6 +42,7 @@
                             <option value="astral">Astral</option>
                             <option value="gn-math">GN-Math</option>
                             <option value="ugs">UGS</option>
+                            <option value="seraph">Seraph</option>
                         </select>
                     </div>
                 </div>
@@ -60,6 +72,30 @@
                 frameborder="0"
                 allowfullscreen
             ></iframe>
+        </div>
+
+        <div id="whats-new-modal" class="modal-overlay hidden">
+            <div class="modal-card">
+                <div class="modal-header">
+                    <h2>Astral</h2>
+                    <span class="version-badge">1.0.0</span>
+                </div>
+
+                <div class="modal-body">
+                    <p class="release-tagline">Official Launch Release</p>
+                    <ul class="changelog-list">
+                        <li>Added over 2,500+ Games</li>
+                        <li>Added Tab & About:blank cloaking settings</li>
+                        <li>Added recently played and favorited categories.</li>
+                    </ul>
+                </div>
+
+                <div class="modal-footer">
+                    <button id="close-whats-new-btn" class="modal-btn">
+                        Explore Astral
+                    </button>
+                </div>
+            </div>
         </div>
 
         <div id="settings-modal" class="settings-modal hidden">
@@ -103,6 +139,10 @@
                         <button id="save-panic-url-btn" class="settings-btn">
                             Save
                         </button>
+                    </div>
+                    <div class="settings-option">
+                        <span>Auto about:blank</span>
+                        <input type="checkbox" id="auto-cloak-checkbox" />
                     </div>
                 </div>
             </div>

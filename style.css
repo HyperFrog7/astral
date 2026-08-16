@@ -1,5 +1,6 @@
 :root {
     --bg-primary: #0d1b2a;
+    --bg-primary-rgb: 13 27 42;
     --bg-secondary: #152238;
     --bg-surface: #1b263b;
     --border: #415a77;
@@ -8,16 +9,51 @@
     --accent: #cba6f7;
 }
 
+@font-face {
+    font-family: "Maple Mono";
+    src: url("../fonts/MapleMono[wght]-VF.woff2") format("woff2-variations");
+    font-weight: 100 900;
+    font-style: normal;
+    font-display: swap;
+}
+
 html,
 body {
     background-color: var(--bg-primary);
     font-family: "Maple Mono", monospace;
     color: var(--text-primary);
-    margin: 0px;
-    padding: 0px;
+    margin: 0;
+    padding: 0;
+}
+
+::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+}
+
+::-webkit-scrollbar-track {
+    background-color: var(--bg-primary);
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background-color: var(--border);
+}
+
+* {
+    scrollbar-color: var(--bg-surface) var(--bg-primary);
+    scrollbar-width: thin;
 }
 
 .navbar {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
     display: grid;
     grid-template-columns: 1fr auto 1fr;
     align-items: center;
@@ -87,6 +123,7 @@ body {
     outline: none;
     cursor: pointer;
     transition: all 0.2s ease;
+    margin-right: -6px;
 }
 
 #category-select:hover {
@@ -174,7 +211,7 @@ body {
 }
 
 .game-card {
-    position: overlay;
+    position: relative;
     background-color: var(--bg-surface);
     border: 1px solid var(--border);
     border-radius: 12px;
@@ -204,7 +241,7 @@ body {
     background: var(--bg-surface);
     border: 1px solid var(--border);
     color: var(--accent);
-    border-radius: 50%;
+    border-radius: 8px;
     width: 28px;
     height: 28px;
     cursor: pointer;
@@ -240,7 +277,7 @@ body {
     left: 0;
     width: 100vw;
     height: 100vh;
-    background-color: rgba(13, 27, 42, 0.95);
+    background-color: rgb(var(--bg-primary-rgb) / 95%);
     z-index: 9999;
     display: flex;
     flex-direction: column;
@@ -313,13 +350,91 @@ body {
     display: block;
 }
 
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background-color: rgb(var(--bg-primary-rgb) / 85%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    backdrop-filter: blur(4px);
+}
+
+.modal-card {
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    max-width: 420px;
+    width: 90%;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+    color: var(--text-primary);
+}
+
+.modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+.modal-header h2 {
+    margin: 0;
+    color: var(--text-primary);
+}
+
+.version-badge {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    color: var(--accent);
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.release-tagline {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    margin-bottom: 12px;
+}
+
+.changelog-list {
+    padding-left: 20px;
+    line-height: 1.6;
+    color: var(--text-primary);
+    margin-bottom: 20px;
+}
+
+.changelog-list li {
+    margin-bottom: 6px;
+}
+
+.modal-btn {
+    width: 100%;
+    padding: 10px;
+    background-color: var(--accent);
+    color: var(--bg-primary);
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+}
+
+.modal-btn:hover {
+    opacity: 0.9;
+}
+
 .settings-modal {
     position: fixed;
     top: 0;
     left: 0;
     width: 100vw;
     height: 100vh;
-    background-color: rgba(13, 27, 42, 0.85);
+    background-color: rgb(var(--bg-primary-rgb) / 85%);
     backdrop-filter: blur(4px);
     z-index: 10000;
     display: flex;
@@ -327,7 +442,8 @@ body {
     justify-content: center;
 }
 
-.settings-modal.hidden {
+.settings-modal.hidden,
+.modal-overlay.hidden {
     display: none !important;
 }
 
@@ -373,6 +489,46 @@ body {
     color: var(--text-primary);
 }
 
+#auto-cloak-checkbox {
+    appearance: none;
+    -webkit-appearance: none;
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    margin: 0;
+}
+
+#auto-cloak-checkbox:hover {
+    border-color: var(--accent);
+}
+
+#auto-cloak-checkbox:checked {
+    background-color: var(--accent);
+    border-color: var(--accent);
+}
+
+#auto-cloak-checkbox:checked::after {
+    content: "";
+    width: 4px;
+    height: 8px;
+    border: solid var(--bg-primary);
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+    margin-bottom: 2px;
+}
+
+#auto-cloak-checkbox:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(203, 166, 247, 0.25);
+}
+
 .settings-btn {
     background-color: var(--bg-secondary);
     border: 1px solid var(--border);
@@ -405,13 +561,13 @@ body {
         border-color 0.2s ease,
         box-shadow 0.2s ease;
     max-width: 250px;
-    font-family: Maple Mono;
+    font-family: "Maple Mono", monospace;
 }
 
 .setting-input::placeholder {
     color: var(--text-primary);
     opacity: 0.7;
-    font-family: Maple Mono;
+    font-family: "Maple Mono", monospace;
 }
 
 .setting-input:focus {

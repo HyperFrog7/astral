@@ -1,9 +1,33 @@
 let allGames = [];
 let activeGameFile = "";
+let visibleCount = 48;
 
+const BOOKS_CDN_URL = "https://cdn.jsdelivr.net/gh/HyperFrog7/books@main/";
 const RECENT_KEY = "astral_recent_games";
 const FAVORITES_KEY = "astral_favorite_games";
 const COLLAPSED_KEY = "astral_collapsed_categories";
+const CURRENT_VERSION = "1.0.0";
+const VERSION_KEY = "astral_seen_version";
+const batchSize = 48;
+
+function checkVersionModal() {
+  const seenVersion = localStorage.getItem(VERSION_KEY);
+
+  if (seenVersion !== CURRENT_VERSION) {
+    const modal = document.getElementById("whats-new-modal");
+    if (modal) {
+      modal.classList.remove("hidden");
+    }
+  }
+}
+
+function dismissVersionModal() {
+  const modal = document.getElementById("whats-new-modal");
+  if (modal) {
+    modal.classList.add("hidden");
+  }
+  localStorage.setItem(VERSION_KEY, CURRENT_VERSION);
+}
 
 function getCollapsedCategories() {
   return JSON.parse(localStorage.getItem(COLLAPSED_KEY)) || [];
@@ -110,8 +134,27 @@ window.closeSettings = function () {
   if (modal) modal.classList.add("hidden");
 };
 
+function loadAutoCloakSetting() {
+  const checkbox = document.getElementById("auto-cloak-checkbox");
+  if (!checkbox) return;
+
+  const isAutoCloakEnabled =
+    localStorage.getItem("autoCloakEnabled") === "true";
+  checkbox.checked = isAutoCloakEnabled;
+}
+
+function saveAutoCloakSetting() {
+  const checkbox = document.getElementById("auto-cloak-checkbox");
+  if (!checkbox) return;
+
+  localStorage.setItem("autoCloakEnabled", checkbox.checked ? "true" : "false");
+}
+
 function openInAboutBlank(url) {
-  const targetUrl = url || window.location.href;
+  let targetUrl = url || window.location.href;
+  if (!targetUrl.startsWith("http")) {
+    targetUrl = "https://cdn.jsdelivr.net/gh/hyperfrog7/Astral@main/index.html";
+  }
 
   const win = window.open("about:blank", "_blank");
   if (!win) {
@@ -142,9 +185,10 @@ function openInAboutBlank(url) {
   iframe.style.outline = "none";
 
   doc.body.appendChild(iframe);
+
   const redirectUrl =
     localStorage.getItem("panicRedirectUrl") || "https://www.google.com";
-  window.location.replace(redirectUrl);
+  window.location.href = redirectUrl;
 }
 
 function loadPanicUrlSetting() {
@@ -177,6 +221,7 @@ function getCategoryKey(game) {
   const filePath = game.file || game.url || "";
   if (filePath.indexOf("games/gn-math/") !== -1) return "GN-Math";
   if (filePath.indexOf("games/ugs/") !== -1) return "UGS";
+  if (filePath.indexOf("games/seraph/") !== -1) return "Seraph";
   return "Astral";
 }
 
@@ -199,12 +244,14 @@ function updateCategoryDropdown() {
   const astralCount = (grouped["Astral"] || []).length;
   const gnMathCount = (grouped["GN-Math"] || []).length;
   const ugsCount = (grouped["UGS"] || []).length;
+  const seraphCount = (grouped["Seraph"] || []).length;
 
   categorySelect.innerHTML = `
     <option value="all">All (${allGames.length})</option>
     <option value="astral">Astral (${astralCount})</option>
     <option value="gn-math">GN-Math (${gnMathCount})</option>
     <option value="ugs">UGS (${ugsCount})</option>
+    <option value="seraph">Seraph (${seraphCount})</option>
   `;
 }
 
@@ -304,8 +351,8 @@ function renderCategorizedGames(gamesList, isFiltered = false) {
     const recents = getRecents();
     const favorites = getFavorites();
 
-    renderCategorySection(container, "Recently Played", recents);
     renderCategorySection(container, "Favorites", favorites);
+    renderCategorySection(container, "Recently Played", recents);
   }
 
   const grouped = groupGamesByCategory(gamesList);
@@ -341,7 +388,8 @@ function applyFilters() {
       if (selectedCategory === "astral") {
         matchesCategory =
           filePath.indexOf("games/gn-math/") === -1 &&
-          filePath.indexOf("games/ugs/") === -1;
+          filePath.indexOf("games/ugs/") === -1 &&
+          filePath.indexOf("games/seraph/") === -1;
       } else {
         const targetPath = "games/" + selectedCategory + "/";
         matchesCategory =
@@ -352,7 +400,10 @@ function applyFilters() {
     return matchesSearch && matchesCategory;
   });
 
-  renderCategorizedGames(matched, isFiltered);
+  window.currentMatchedGames = matched;
+
+  const visibleGames = matched.slice(0, visibleCount);
+  renderCategorizedGames(visibleGames, isFiltered);
 }
 
 window.searchGames = function () {
@@ -365,19 +416,23 @@ window.changeCategory = function () {
 
 async function loadAllGames() {
   try {
-    const astralResponse = await fetch("games/astral.json");
+    const astralResponse = await fetch(`${BOOKS_CDN_URL}astral.json`);
     const astralGames = await astralResponse.json();
 
-    const gnMathResponse = await fetch("games/gn-math/gn-math.json");
+    const gnMathResponse = await fetch(`${BOOKS_CDN_URL}gn-math.json`);
     const gnMathGames = await gnMathResponse.json();
 
-    const ugsResponse = await fetch("games/ugs/ugs.json");
+    const ugsResponse = await fetch(`${BOOKS_CDN_URL}ugs.json`);
     const ugsGames = await ugsResponse.json();
 
-    allGames = [...astralGames, ...gnMathGames, ...ugsGames];
+    const seraphResponse = await fetch(`${BOOKS_CDN_URL}seraph.json`);
+    const seraphGames = await seraphResponse.json();
+
+    allGames = [...astralGames, ...gnMathGames, ...ugsGames, ...seraphGames];
+    window.currentMatchedGames = allGames;
 
     updateCategoryDropdown();
-    renderCategorizedGames(allGames, false);
+    applyFilters();
   } catch (error) {
     console.error("Error loading games:", error);
   }
@@ -405,10 +460,8 @@ async function openGame(gameParam, fallbackPath) {
   activeGameFile = filePath;
   gameTitle.textContent = name || "Untitled Game";
 
-  let targetUrl = filePath;
-  if (window.location.protocol === "file:" && !filePath.startsWith("http")) {
-    targetUrl = `https://cdn.jsdelivr.net/gh/hyperfrog7/Astral@main/${filePath}`;
-  }
+  const cleanPath = filePath.replace(/^(games\/|\.\/)/, "");
+  let targetUrl = `${BOOKS_CDN_URL}${cleanPath}`;
 
   try {
     const response = await fetch(targetUrl + "?t=" + Date.now());
@@ -422,22 +475,6 @@ async function openGame(gameParam, fallbackPath) {
 
   gameModal.classList.remove("hidden");
   document.body.style.overflow = "hidden";
-}
-
-function closeGame() {
-  const gameModal = document.getElementById("game-modal");
-  const gameFrame = document.getElementById("game-frame");
-
-  if (gameModal) gameModal.classList.add("hidden");
-  if (gameFrame) {
-    if (gameFrame.dataset.blobUrl) {
-      URL.revokeObjectURL(gameFrame.dataset.blobUrl);
-      delete gameFrame.dataset.blobUrl;
-    }
-    gameFrame.src = "about:blank";
-  }
-
-  document.body.style.overflow = "";
 }
 
 function setTabCloak(presetKey) {
@@ -459,12 +496,21 @@ function setTabCloak(presetKey) {
 
 document.addEventListener("DOMContentLoaded", () => {
   loadPanicUrlSetting();
+  loadAutoCloakSetting();
 
   const saveBtn = document.getElementById("save-panic-url-btn");
   if (saveBtn) {
     saveBtn.addEventListener("click", savePanicUrlSetting);
   }
 
+  const autoCloakCheckbox = document.getElementById("auto-cloak-checkbox");
+  if (autoCloakCheckbox) {
+    autoCloakCheckbox.addEventListener("change", () => {
+      saveAutoCloakSetting();
+    });
+  }
+
+  const closeWhatsNewBtn = document.getElementById("close-whats-new-btn");
   const searchInput = document.getElementById("search-input");
   const categorySelect = document.getElementById("category-select");
   const closeBtn = document.getElementById("close-btn");
@@ -479,6 +525,12 @@ document.addEventListener("DOMContentLoaded", () => {
   const savedCloak = localStorage.getItem("selectedCloak") || "default";
   setTabCloak(savedCloak);
 
+  if (closeWhatsNewBtn) {
+    closeWhatsNewBtn.addEventListener("click", dismissVersionModal);
+  }
+
+  checkVersionModal();
+
   if (settingsIcon) {
     settingsIcon.addEventListener("click", window.openSettings);
   }
@@ -490,8 +542,20 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  if (searchInput) searchInput.addEventListener("input", applyFilters);
-  if (categorySelect) categorySelect.addEventListener("change", applyFilters);
+  if (searchInput) {
+    searchInput.addEventListener("input", () => {
+      visibleCount = batchSize;
+      applyFilters();
+    });
+  }
+
+  if (categorySelect) {
+    categorySelect.addEventListener("change", () => {
+      visibleCount = batchSize;
+      applyFilters();
+    });
+  }
+
   if (closeBtn) closeBtn.addEventListener("click", closeGame);
 
   if (fullscreenBtn) {
@@ -536,6 +600,15 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  if (
+    window.self === window.top &&
+    localStorage.getItem("autoCloakEnabled") === "true"
+  ) {
+    setTimeout(() => {
+      openInAboutBlank(window.location.href);
+    }, 100);
+  }
+
   loadAllGames();
 });
 
@@ -550,5 +623,19 @@ window.addEventListener("keydown", (e) => {
     if (settingsModal && !settingsModal.classList.contains("hidden")) {
       window.closeSettings();
     }
+  }
+});
+
+window.addEventListener("scroll", () => {
+  const scrollPosition = window.innerHeight + window.scrollY;
+  const threshold = document.body.offsetHeight - 500;
+
+  const totalMatched = window.currentMatchedGames
+    ? window.currentMatchedGames.length
+    : 0;
+
+  if (scrollPosition >= threshold && visibleCount < totalMatched) {
+    visibleCount += batchSize;
+    applyFilters();
   }
 });
