@@ -219,9 +219,9 @@ function savePanicUrlSetting() {
 
 function getCategoryKey(game) {
   const filePath = game.file || game.url || "";
-  if (filePath.indexOf("games/gn-math/") !== -1) return "GN-Math";
-  if (filePath.indexOf("games/ugs/") !== -1) return "UGS";
-  if (filePath.indexOf("games/seraph/") !== -1) return "Seraph";
+  if (filePath.includes("gn-math/")) return "GN-Math";
+  if (filePath.includes("ugs/")) return "UGS";
+  if (filePath.includes("seraph/")) return "Seraph";
   return "Astral";
 }
 
@@ -387,13 +387,13 @@ function applyFilters() {
     if (selectedCategory !== "all") {
       if (selectedCategory === "astral") {
         matchesCategory =
-          filePath.indexOf("games/gn-math/") === -1 &&
-          filePath.indexOf("games/ugs/") === -1 &&
-          filePath.indexOf("games/seraph/") === -1;
+          !filePath.includes("gn-math/") &&
+          !filePath.includes("ugs/") &&
+          !filePath.includes("seraph/");
       } else {
-        const targetPath = "games/" + selectedCategory + "/";
+        const targetPath = selectedCategory + "/";
         matchesCategory =
-          filePath.indexOf(targetPath) !== -1 || category === selectedCategory;
+          filePath.includes(targetPath) || category === selectedCategory;
       }
     }
 
@@ -436,6 +436,19 @@ async function loadAllGames() {
   } catch (error) {
     console.error("Error loading games:", error);
   }
+}
+
+function closeGame() {
+  const gameModal = document.getElementById("game-modal");
+  const gameFrame = document.getElementById("game-frame");
+
+  if (gameModal) gameModal.classList.add("hidden");
+  if (gameFrame) {
+    gameFrame.removeAttribute("srcdoc");
+    gameFrame.src = "about:blank";
+  }
+
+  document.body.style.overflow = "";
 }
 
 async function openGame(gameParam, fallbackPath) {
