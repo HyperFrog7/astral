@@ -221,7 +221,8 @@ function getCategoryKey(game) {
   const filePath = game.file || game.url || "";
   if (filePath.includes("gn-math/")) return "GN-Math";
   if (filePath.includes("ugs/")) return "UGS";
-  if (filePath.includes("seraph/")) return "Seraph";
+  if (filePath.includes("seraph/") || filePath.includes("seraph"))
+    return "Seraph";
   return "Astral";
 }
 
@@ -389,11 +390,14 @@ function applyFilters() {
         matchesCategory =
           !filePath.includes("gn-math/") &&
           !filePath.includes("ugs/") &&
-          !filePath.includes("seraph/");
+          !filePath.includes("seraph/") &&
+          !filePath.includes("seraph");
       } else {
         const targetPath = selectedCategory + "/";
         matchesCategory =
-          filePath.includes(targetPath) || category === selectedCategory;
+          filePath.includes(targetPath) ||
+          filePath.includes(selectedCategory) ||
+          category === selectedCategory;
       }
     }
 
