@@ -151,71 +151,21 @@ function saveAutoCloakSetting() {
 }
 
 function openInAboutBlank(url) {
-  let targetUrl = url || window.location.href;
-  if (!targetUrl.startsWith("http")) {
-    targetUrl = "https://cdn.jsdelivr.net/gh/hyperfrog7/Astral@main/index.html";
-  }
+  const pageHtml = document.documentElement.outerHTML;
 
   const win = window.open("about:blank", "_blank");
   if (!win) {
-    alert("Please allow popups for tab cloaking to work sonion.");
+    alert("Please allow popups for tab cloaking to work. sonion 🫪");
     return;
   }
 
-  const doc = win.document;
+  win.document.open("text/html", "replace");
+  win.document.write(pageHtml);
+  win.document.close();
 
-  doc.open();
-  doc.write(`
-    <!DOCTYPE html>
-    <html>
-      <head>
-        <title>${currentCloak.title}</title>
-        <link rel="icon" type="image/png" href="${currentCloak.icon}">
-        <style>
-          html, body {
-            margin: 0;
-            padding: 0;
-            width: 100vw;
-            height: 100vh;
-            overflow: hidden;
-            background-color: #000;
-          }
-          iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
-            outline: none;
-          }
-        </style>
-      </head>
-      <body>
-        <iframe src="${targetUrl}"></iframe>
-      </body>
-    </html>
-  `);
-  doc.close();
-
-  const redirectUrl =
+  const panicUrl =
     localStorage.getItem("panicRedirectUrl") || "https://www.google.com";
-  window.location.href = redirectUrl;
-}
-
-function savePanicUrlSetting() {
-  const input = document.getElementById("panic-url-input");
-  if (!input) return;
-
-  let url = input.value.trim();
-
-  if (url && !url.startsWith("http://") && !url.startsWith("https://")) {
-    url = "https://" + url;
-    input.value = url;
-  }
-
-  if (url) {
-    localStorage.setItem("panicRedirectUrl", url);
-  } else {
-    localStorage.removeItem("panicRedirectUrl");
-  }
+  window.location.href = panicUrl;
 }
 
 function loadPanicUrlSetting() {
