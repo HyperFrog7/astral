@@ -150,32 +150,40 @@ function saveAutoCloakSetting() {
   localStorage.setItem("autoCloakEnabled", checkbox.checked ? "true" : "false");
 }
 
-function openInAboutBlank(url) {
-  const pageHtml = document.documentElement.outerHTML;
+async function openInAboutBlank() {
+  try {
+    let response = await fetch("singlefile.html");
 
-  const win = window.open("about:blank", "_blank");
-  if (!win) {
-    alert("Please allow popups for tab cloaking to work. sonion 🫪");
-    return;
+    if (!response.ok) {
+      response = await fetch(
+        "https://cdn.jsdelivr.net/gh/hyperfrog7/Astral@main/singlefile.html",
+      );
+    }
+
+    if (!response.ok) {
+      throw new Error(
+        `Failed to retrieve singlefile.html (${response.status})`,
+      );
+    }
+
+    const htmlContent = await response.text();
+
+    const win = window.open("about:blank", "_blank");
+    if (!win) {
+      alert("Please allow popups for tab cloaking to work. sonion 🫪");
+      return;
+    }
+
+    win.document.open("text/html", "replace");
+    win.document.write(htmlContent);
+    win.document.close();
+
+    const panicUrl =
+      localStorage.getItem("panicRedirectUrl") || "https://www.google.com";
+    window.location.href = panicUrl;
+  } catch (error) {
+    console.error("Error opening singlefile.html in about:blank:", error);
   }
-
-  win.document.open("text/html", "replace");
-  win.document.write(`
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <base href="${currentBase}">
-        </head>
-        <body>
-          ${pageHtml}
-        </body>
-      </html>
-    `);
-  win.document.close();
-
-  const panicUrl =
-    localStorage.getItem("panicRedirectUrl") || "https://www.google.com";
-  window.location.href = panicUrl;
 }
 
 function savePanicUrlSetting() {
