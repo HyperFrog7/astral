@@ -160,12 +160,32 @@ function openInAboutBlank(url) {
   }
 
   win.document.open("text/html", "replace");
-  win.document.write(pageHtml);
+  win.document.write(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <base href="${currentBase}">
+        </head>
+        <body>
+          ${pageHtml}
+        </body>
+      </html>
+    `);
   win.document.close();
 
   const panicUrl =
     localStorage.getItem("panicRedirectUrl") || "https://www.google.com";
   window.location.href = panicUrl;
+}
+
+function savePanicUrlSetting() {
+  const panicInput = document.getElementById("panic-url-input");
+  if (!panicInput) return;
+
+  const url = panicInput.value.trim();
+  if (url) {
+    localStorage.setItem("panicRedirectUrl", url);
+  }
 }
 
 function loadPanicUrlSetting() {
