@@ -163,40 +163,41 @@ function openInAboutBlank(url) {
   }
 
   const doc = win.document;
-  doc.title = currentCloak.title;
 
-  const link = doc.createElement("link");
-  link.rel = "icon";
-  link.type = "image/png";
-  link.href = currentCloak.icon;
-  doc.head.appendChild(link);
-
-  const iframe = doc.createElement("iframe");
-  iframe.src = targetUrl;
-
-  doc.body.style.margin = "0";
-  doc.body.style.padding = "0";
-  doc.body.style.overflow = "hidden";
-  doc.body.style.backgroundColor = "#000";
-
-  iframe.style.width = "100vw";
-  iframe.style.height = "100vh";
-  iframe.style.border = "none";
-  iframe.style.outline = "none";
-
-  doc.body.appendChild(iframe);
+  doc.open();
+  doc.write(`
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <title>${currentCloak.title}</title>
+        <link rel="icon" type="image/png" href="${currentCloak.icon}">
+        <style>
+          html, body {
+            margin: 0;
+            padding: 0;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            background-color: #000;
+          }
+          iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            outline: none;
+          }
+        </style>
+      </head>
+      <body>
+        <iframe src="${targetUrl}"></iframe>
+      </body>
+    </html>
+  `);
+  doc.close();
 
   const redirectUrl =
     localStorage.getItem("panicRedirectUrl") || "https://www.google.com";
   window.location.href = redirectUrl;
-}
-
-function loadPanicUrlSetting() {
-  const input = document.getElementById("panic-url-input");
-  if (!input) return;
-
-  const savedUrl = localStorage.getItem("panicRedirectUrl") || "";
-  input.value = savedUrl;
 }
 
 function savePanicUrlSetting() {
@@ -215,6 +216,15 @@ function savePanicUrlSetting() {
   } else {
     localStorage.removeItem("panicRedirectUrl");
   }
+}
+
+function loadPanicUrlSetting() {
+  const panicInput = document.getElementById("panic-url-input");
+  if (!panicInput) return;
+
+  const savedUrl =
+    localStorage.getItem("panicRedirectUrl") || "https://www.google.com";
+  panicInput.value = savedUrl;
 }
 
 function getCategoryKey(game) {
