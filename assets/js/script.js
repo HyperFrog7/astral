@@ -1,5 +1,5 @@
-const ASTRAL_CDN_URL = "https://cdn.jsdelivr.net/gh/hyperfrog7/Astral@main/";
-const BOOKS_CDN_URL = "https://cdn.jsdelivr.net/gh/HyperFrog7/books@main/";
+const ASTRAL_CDN_URL = "https://cdn.jsdelivr.net/gh/hyperfrog7/Astral@latest/";
+const BOOKS_CDN_URL = "https://cdn.jsdelivr.net/gh/HyperFrog7/books@latest/";
 
 function getCacheKey() {
   return Math.floor(Date.now() / (1000 * 60 * 5));
@@ -194,7 +194,7 @@ async function openInAboutBlank(targetUrlParam) {
 
     if (!response.ok) {
       response = await fetch(
-        "https://cdn.jsdelivr.net/gh/hyperfrog7/Astral@main/assets/payloads/singlefile.html",
+        "https://cdn.jsdelivr.net/gh/hyperfrog7/Astral@latest/assets/payloads/singlefile.html",
       );
     }
 
