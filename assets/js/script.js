@@ -80,31 +80,31 @@ function toggleCollapsedCategory(categoryTitle) {
 const cloakPresets = {
   default: {
     title: "Astral",
-    icon: "assets/media/logo.svg",
+    icon: `${ASTRAL_CDN_URL}assets/media/logo.svg`,
   },
   google: {
     title: "Google",
-    icon: "assets/media/google.png",
+    icon: `${ASTRAL_CDN_URL}assets/media/google.png`,
   },
   drive: {
     title: "My Drive - Google Drive",
-    icon: "assets/media/drive.png",
+    icon: `${ASTRAL_CDN_URL}assets/media/drive.png`,
   },
   classroom: {
     title: "Classes",
-    icon: "assets/media/classroom.png",
+    icon: `${ASTRAL_CDN_URL}assets/media/classroom.png`,
   },
   clever: {
     title: "Clever | Portal",
-    icon: "assets/media/clever.png",
+    icon: `${ASTRAL_CDN_URL}assets/media/clever.png`,
   },
   grades: {
     title: "Grades",
-    icon: "assets/media/grades.png",
+    icon: `${ASTRAL_CDN_URL}assets/media/grades.png`,
   },
   newtab: {
     title: "New Tab",
-    icon: "educational site",
+    icon: `${ASTRAL_CDN_URL}assets/media/logo.svg`,
   },
 };
 
@@ -183,12 +183,12 @@ function saveAutoCloakSetting() {
 
 async function openInAboutBlank(targetUrlParam) {
   try {
-    let response = await fetch("assets/payloads/singlefile.html");
+    let response = await fetch(
+      `${ASTRAL_CDN_URL}assets/payloads/singlefile.html`,
+    );
 
     if (!response.ok) {
-      response = await fetch(
-        "https://cdn.jsdelivr.net/gh/hyperfrog7/Astral@latest/assets/payloads/singlefile.html",
-      );
+      response = await fetch("assets/payloads/singlefile.html");
     }
 
     if (!response.ok) {
@@ -307,10 +307,12 @@ function renderCategorySection(container, title, gamesList) {
     toggleCollapsedCategory(title);
   });
 
+  const fallbackLogo = `${ASTRAL_CDN_URL}assets/media/logo.svg`;
+
   gamesList.forEach((game) => {
     const name = game.name || game.title || "Untitled Game";
     let rawIcon = game.icon || game.cover || "";
-    let imageSrc = "assets/media/logo.svg";
+    let imageSrc = fallbackLogo;
 
     if (
       rawIcon &&
@@ -341,7 +343,7 @@ function renderCategorySection(container, title, gamesList) {
         alt="${name}"
         class="game-icon"
         loading="lazy"
-        onerror="this.onerror=null; this.src='assets/media/logo.svg';"
+        onerror="this.onerror=null; this.src='${fallbackLogo}';"
       />
       <h3 class="game-title">${name}</h3>
     `;
@@ -491,6 +493,11 @@ async function openGame(gameParam, fallbackPath) {
 
     let htmlContent = await response.text();
 
+    htmlContent = htmlContent.replace(
+      /(src|href)=["']\/?gh\/[^\/]+\/[^\/]+\/([^"']+)["']/g,
+      '$1="$2"',
+    );
+
     if (htmlContent.includes("<head>")) {
       htmlContent = htmlContent.replace(
         "<head>",
@@ -509,6 +516,7 @@ async function openGame(gameParam, fallbackPath) {
   gameModal.classList.remove("hidden");
   document.body.style.overflow = "hidden";
 }
+
 function setTabCloak(presetKey) {
   const preset = cloakPresets[presetKey] || cloakPresets.default;
   currentCloak = preset;
