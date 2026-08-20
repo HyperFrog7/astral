@@ -1,8 +1,32 @@
+async function getLatestCDNUrl(repoOwner, repoName) {
+  try {
+    const res = await fetch(
+      `https://api.github.com/repos/${repoOwner}/${repoName}/commits/main`,
+    );
+    const data = await res.json();
+    const commitHash = data.sha.substring(0, 7);
+    return `https://cdn.jsdelivr.net/gh/${repoOwner}/${repoName}@${commitHash}/`;
+  } catch (err) {
+    return `https://cdn.jsdelivr.net/gh/${repoOwner}/${repoName}@main/`;
+  }
+}
+
+let ASTRAL_CDN_URL = "";
+let BOOKS_CDN_URL = "";
+
+async function init() {
+  ASTRAL_CDN_URL = await getLatestCDNUrl("hyperfrog7", "Astral");
+  BOOKS_CDN_URL = await getLatestCDNUrl("HyperFrog7", "books");
+
+  await loadAllGames();
+}
+
+init();
+
 let allGames = [];
 let activeGameFile = "";
 let visibleCount = 48;
 
-const BOOKS_CDN_URL = "https://cdn.jsdelivr.net/gh/HyperFrog7/books@main/";
 const RECENT_KEY = "astral_recent_games";
 const FAVORITES_KEY = "astral_favorite_games";
 const COLLAPSED_KEY = "astral_collapsed_categories";
@@ -276,11 +300,10 @@ function renderCategorySection(container, title, gamesList) {
     toggleCollapsedCategory(title);
   });
 
-  const ASTRAL_CDN_URL = "https://cdn.jsdelivr.net/gh/hyperfrog7/Astral@main/";
-
   gamesList.forEach((game) => {
     const name = game.name || game.title || "Untitled Game";
     let rawIcon = game.icon || game.cover || "";
+    let imageSrc = `${ASTRAL_CDN_URL}${cleanIconPath}`;
 
     if (
       rawIcon &&
@@ -623,8 +646,6 @@ document.addEventListener("DOMContentLoaded", () => {
       openInAboutBlank(window.location.href);
     }, 100);
   }
-
-  loadAllGames();
 });
 
 window.addEventListener("keydown", (e) => {
