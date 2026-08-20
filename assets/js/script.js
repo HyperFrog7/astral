@@ -1,27 +1,41 @@
-async function getLatestCDNUrl(repoOwner, repoName) {
+const ASTRAL_CDN_URL = "https://cdn.jsdelivr.net/gh/hyperfrog7/Astral@main/";
+const BOOKS_CDN_URL = "https://cdn.jsdelivr.net/gh/HyperFrog7/books@main/";
+
+function getCacheKey() {
+  return Math.floor(Date.now() / (1000 * 60 * 5));
+}
+
+async function loadAllGames() {
   try {
-    const res = await fetch(
-      `https://api.github.com/repos/${repoOwner}/${repoName}/commits/main`,
+    const cacheKey = getCacheKey();
+
+    const astralResponse = await fetch(
+      `${BOOKS_CDN_URL}astral.json?v=${cacheKey}`,
     );
-    const data = await res.json();
-    const commitHash = data.sha.substring(0, 7);
-    return `https://cdn.jsdelivr.net/gh/${repoOwner}/${repoName}@${commitHash}/`;
-  } catch (err) {
-    return `https://cdn.jsdelivr.net/gh/${repoOwner}/${repoName}@main/`;
+    const astralGames = await astralResponse.json();
+
+    const gnMathResponse = await fetch(
+      `${BOOKS_CDN_URL}gn-math.json?v=${cacheKey}`,
+    );
+    const gnMathGames = await gnMathResponse.json();
+
+    const ugsResponse = await fetch(`${BOOKS_CDN_URL}ugs.json?v=${cacheKey}`);
+    const ugsGames = await ugsResponse.json();
+
+    const seraphResponse = await fetch(
+      `${BOOKS_CDN_URL}seraph.json?v=${cacheKey}`,
+    );
+    const seraphGames = await seraphResponse.json();
+
+    allGames = [...astralGames, ...gnMathGames, ...ugsGames, ...seraphGames];
+    window.currentMatchedGames = allGames;
+
+    updateCategoryDropdown();
+    applyFilters();
+  } catch (error) {
+    console.error("Error loading games:", error);
   }
 }
-
-let ASTRAL_CDN_URL = "";
-let BOOKS_CDN_URL = "";
-
-async function init() {
-  ASTRAL_CDN_URL = await getLatestCDNUrl("hyperfrog7", "Astral");
-  BOOKS_CDN_URL = await getLatestCDNUrl("HyperFrog7", "books");
-
-  await loadAllGames();
-}
-
-init();
 
 let allGames = [];
 let activeGameFile = "";
