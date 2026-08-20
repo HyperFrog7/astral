@@ -197,7 +197,9 @@ async function openInAboutBlank(targetUrlParam) {
       );
     }
 
-    const htmlContent = await response.text();
+    let htmlContent = await response.text();
+
+    htmlContent = htmlContent.replace(/assets\/images\//g, "assets/media/");
 
     const win = window.open("about:blank", "_blank");
     if (!win) {
@@ -319,7 +321,12 @@ function renderCategorySection(container, title, gamesList) {
       !rawIcon.startsWith("http") &&
       !rawIcon.startsWith("data:")
     ) {
-      const cleanIconPath = rawIcon.replace(/^(\.\/|\/)/, "");
+      let cleanIconPath = rawIcon.replace(/^(\.\/|\/)/, "");
+      cleanIconPath = cleanIconPath.replace(
+        /^assets\/images\//,
+        "assets/media/",
+      );
+
       imageSrc = `${ASTRAL_CDN_URL}${cleanIconPath}`;
     } else if (rawIcon) {
       imageSrc = rawIcon;
@@ -493,11 +500,6 @@ async function openGame(gameParam, fallbackPath) {
 
     let htmlContent = await response.text();
 
-    htmlContent = htmlContent.replace(
-      /(src|href)=["']\/?gh\/[^\/]+\/[^\/]+\/([^"']+)["']/g,
-      '$1="$2"',
-    );
-
     if (htmlContent.includes("<head>")) {
       htmlContent = htmlContent.replace(
         "<head>",
@@ -665,16 +667,23 @@ window.addEventListener("keydown", (e) => {
   }
 });
 
+let isScrolling = false;
 window.addEventListener("scroll", () => {
-  const scrollPosition = Math.ceil(window.innerHeight + window.scrollY);
-  const threshold = document.body.offsetHeight - 500;
+  if (isScrolling) return;
 
-  const totalMatched = window.currentMatchedGames
-    ? window.currentMatchedGames.length
-    : 0;
+  isScrolling = true;
+  requestAnimationFrame(() => {
+    const scrollPosition = Math.ceil(window.innerHeight + window.scrollY);
+    const threshold = document.body.offsetHeight - 500;
 
-  if (scrollPosition >= threshold && visibleCount < totalMatched) {
-    visibleCount += batchSize;
-    applyFilters();
-  }
+    const totalMatched = window.currentMatchedGames
+      ? window.currentMatchedGames.length
+      : 0;
+
+    if (scrollPosition >= threshold && visibleCount < totalMatched) {
+      visibleCount += batchSize;
+      applyFilters();
+    }
+    isScrolling = false;
+  });
 });
