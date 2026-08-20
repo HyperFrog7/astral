@@ -276,6 +276,8 @@ function renderCategorySection(container, title, gamesList) {
     toggleCollapsedCategory(title);
   });
 
+  const ASTRAL_CDN_URL = "https://cdn.jsdelivr.net/gh/hyperfrog7/Astral@main/";
+
   gamesList.forEach((game) => {
     const name = game.name || game.title || "Untitled Game";
     let rawIcon = game.icon || game.cover || "";
@@ -287,7 +289,7 @@ function renderCategorySection(container, title, gamesList) {
       !rawIcon.startsWith("data:")
     ) {
       const cleanIconPath = rawIcon.replace(/^(\.\/|\/)/, "");
-      imageSrc = `${BOOKS_CDN_URL}${cleanIconPath}?t=${Date.now()}`;
+      imageSrc = `${ASTRAL_CDN_URL}${cleanIconPath}?t=${Date.now()}`;
     }
 
     const gameId = game.file || game.url || game.name;
