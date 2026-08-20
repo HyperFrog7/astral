@@ -1,5 +1,5 @@
-const ASTRAL_CDN_URL = "https://cdn.jsdelivr.net/gh/hyperfrog7/Astral@latest/";
-const BOOKS_CDN_URL = "https://cdn.jsdelivr.net/gh/HyperFrog7/books@latest/";
+const ASTRAL_CDN_URL = "https://cdn.jsdelivr.net/gh/hyperfrog7/Astral@main/";
+const BOOKS_CDN_URL = "https://cdn.jsdelivr.net/gh/HyperFrog7/books@main/";
 
 function getCacheKey() {
   return Math.floor(Date.now() / (1000 * 60 * 5));
@@ -483,9 +483,22 @@ async function openGame(gameParam, fallbackPath) {
   const cleanPath = filePath.replace(/^(games\/|\.\/)/, "");
   let targetUrl = `${BOOKS_CDN_URL}${cleanPath}`;
 
+  const baseUrl = targetUrl.substring(0, targetUrl.lastIndexOf("/") + 1);
+
   try {
     const response = await fetch(targetUrl + "?t=" + Date.now());
-    const htmlContent = await response.text();
+    if (!response.ok) throw new Error(`HTTP error ${response.status}`);
+
+    let htmlContent = await response.text();
+
+    if (htmlContent.includes("<head>")) {
+      htmlContent = htmlContent.replace(
+        "<head>",
+        `<head><base href="${baseUrl}">`,
+      );
+    } else {
+      htmlContent = `<base href="${baseUrl}">` + htmlContent;
+    }
 
     gameFrame.srcdoc = htmlContent;
   } catch (err) {
@@ -496,7 +509,6 @@ async function openGame(gameParam, fallbackPath) {
   gameModal.classList.remove("hidden");
   document.body.style.overflow = "hidden";
 }
-
 function setTabCloak(presetKey) {
   const preset = cloakPresets[presetKey] || cloakPresets.default;
   currentCloak = preset;
