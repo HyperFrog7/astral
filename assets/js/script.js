@@ -322,12 +322,23 @@ function renderCategorySection(container, title, gamesList) {
       !rawIcon.startsWith("data:")
     ) {
       let cleanIconPath = rawIcon.replace(/^(\.\/|\/)/, "");
-      cleanIconPath = cleanIconPath.replace(
-        /^assets\/images\//,
-        "assets/media/",
-      );
 
-      imageSrc = `${ASTRAL_CDN_URL}${cleanIconPath}`;
+      const category = getCategoryKey(game);
+      if (category === "GN-Math") {
+        // Strip out old prefixes and force into assets/media/gn-math/
+        cleanIconPath = cleanIconPath.replace(
+          /^(assets\/(images|media)\/|gn-math\/)/,
+          "",
+        );
+        imageSrc = `${ASTRAL_CDN_URL}assets/media/gn-math/${cleanIconPath}`;
+      } else {
+        // Default media folder path mapping
+        cleanIconPath = cleanIconPath.replace(
+          /^assets\/images\//,
+          "assets/media/",
+        );
+        imageSrc = `${ASTRAL_CDN_URL}${cleanIconPath}`;
+      }
     } else if (rawIcon) {
       imageSrc = rawIcon;
     }
