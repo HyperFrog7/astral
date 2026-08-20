@@ -278,10 +278,16 @@ function renderCategorySection(container, title, gamesList) {
 
   gamesList.forEach((game) => {
     const name = game.name || game.title || "Untitled Game";
-    let imageSrc = game.icon || game.cover || "";
+    let rawIcon = game.icon || game.cover || "";
 
-    if (imageSrc.indexOf("/") === 0) {
-      imageSrc = imageSrc.substring(1);
+    let imageSrc = rawIcon;
+    if (
+      rawIcon &&
+      !rawIcon.startsWith("http") &&
+      !rawIcon.startsWith("data:")
+    ) {
+      const cleanIconPath = rawIcon.replace(/^(\.\/|\/)/, "");
+      imageSrc = `${BOOKS_CDN_URL}${cleanIconPath}`;
     }
 
     const gameId = game.file || game.url || game.name;
@@ -302,7 +308,7 @@ function renderCategorySection(container, title, gamesList) {
         alt="${name}"
         class="game-icon"
         loading="lazy"
-        onerror="this.style.display='none';"
+        onerror="this.onerror=null; this.src='assets/media/logo.svg';"
       />
       <h3 class="game-title">${name}</h3>
     `;
