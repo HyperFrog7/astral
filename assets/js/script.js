@@ -150,7 +150,7 @@ function saveAutoCloakSetting() {
   localStorage.setItem("autoCloakEnabled", checkbox.checked ? "true" : "false");
 }
 
-async function openInAboutBlank() {
+async function openInAboutBlank(targetUrlParam) {
   try {
     let response = await fetch("assets/payloads/singlefile.html");
 
@@ -282,14 +282,13 @@ function renderCategorySection(container, title, gamesList) {
     const name = game.name || game.title || "Untitled Game";
     let rawIcon = game.icon || game.cover || "";
 
-    let imageSrc = rawIcon;
     if (
       rawIcon &&
       !rawIcon.startsWith("http") &&
       !rawIcon.startsWith("data:")
     ) {
       const cleanIconPath = rawIcon.replace(/^(\.\/|\/)/, "");
-      imageSrc = `${ASTRAL_CDN_URL}${cleanIconPath}?t=${Date.now()}`;
+      imageSrc = `${ASTRAL_CDN_URL}${cleanIconPath}`;
     }
 
     const gameId = game.file || game.url || game.name;
