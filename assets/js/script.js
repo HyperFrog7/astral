@@ -287,7 +287,7 @@ function renderCategorySection(container, title, gamesList) {
       !rawIcon.startsWith("data:")
     ) {
       const cleanIconPath = rawIcon.replace(/^(\.\/|\/)/, "");
-      imageSrc = `${BOOKS_CDN_URL}${cleanIconPath}`;
+      imageSrc = `${BOOKS_CDN_URL}${cleanIconPath}?t=${Date.now()}`;
     }
 
     const gameId = game.file || game.url || game.name;
@@ -414,16 +414,17 @@ window.changeCategory = function () {
 
 async function loadAllGames() {
   try {
-    const astralResponse = await fetch(`${BOOKS_CDN_URL}astral.json`);
+    const t = Date.now();
+    const astralResponse = await fetch(`${BOOKS_CDN_URL}astral.json?t=${t}`);
     const astralGames = await astralResponse.json();
 
-    const gnMathResponse = await fetch(`${BOOKS_CDN_URL}gn-math.json`);
+    const gnMathResponse = await fetch(`${BOOKS_CDN_URL}gn-math.json?t=${t}`);
     const gnMathGames = await gnMathResponse.json();
 
-    const ugsResponse = await fetch(`${BOOKS_CDN_URL}ugs.json`);
+    const ugsResponse = await fetch(`${BOOKS_CDN_URL}ugs.json?t=${t}`);
     const ugsGames = await ugsResponse.json();
 
-    const seraphResponse = await fetch(`${BOOKS_CDN_URL}seraph.json`);
+    const seraphResponse = await fetch(`${BOOKS_CDN_URL}seraph.json?t=${t}`);
     const seraphGames = await seraphResponse.json();
 
     allGames = [...astralGames, ...gnMathGames, ...ugsGames, ...seraphGames];
