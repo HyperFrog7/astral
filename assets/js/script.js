@@ -5,26 +5,30 @@ function getCacheKey() {
   return Math.floor(Date.now() / (1000 * 60 * 5));
 }
 
+let allGames = [];
+let activeGameFile = "";
+let visibleCount = 48;
+
+const RECENT_KEY = "astral_recent_games";
+const FAVORITES_KEY = "astral_favorite_games";
+const COLLAPSED_KEY = "astral_collapsed_categories";
+const CURRENT_VERSION = "1.1.0";
+const VERSION_KEY = "astral_seen_version";
+const batchSize = 48;
+
 async function loadAllGames() {
   try {
-    const cacheKey = getCacheKey();
-
-    const astralResponse = await fetch(
-      `${BOOKS_CDN_URL}astral.json?v=${cacheKey}`,
-    );
+    const t = Date.now();
+    const astralResponse = await fetch(`${BOOKS_CDN_URL}astral.json?t=${t}`);
     const astralGames = await astralResponse.json();
 
-    const gnMathResponse = await fetch(
-      `${BOOKS_CDN_URL}gn-math.json?v=${cacheKey}`,
-    );
+    const gnMathResponse = await fetch(`${BOOKS_CDN_URL}gn-math.json?t=${t}`);
     const gnMathGames = await gnMathResponse.json();
 
-    const ugsResponse = await fetch(`${BOOKS_CDN_URL}ugs.json?v=${cacheKey}`);
+    const ugsResponse = await fetch(`${BOOKS_CDN_URL}ugs.json?t=${t}`);
     const ugsGames = await ugsResponse.json();
 
-    const seraphResponse = await fetch(
-      `${BOOKS_CDN_URL}seraph.json?v=${cacheKey}`,
-    );
+    const seraphResponse = await fetch(`${BOOKS_CDN_URL}seraph.json?t=${t}`);
     const seraphGames = await seraphResponse.json();
 
     allGames = [...astralGames, ...gnMathGames, ...ugsGames, ...seraphGames];
@@ -36,17 +40,6 @@ async function loadAllGames() {
     console.error("Error loading games:", error);
   }
 }
-
-let allGames = [];
-let activeGameFile = "";
-let visibleCount = 48;
-
-const RECENT_KEY = "astral_recent_games";
-const FAVORITES_KEY = "astral_favorite_games";
-const COLLAPSED_KEY = "astral_collapsed_categories";
-const CURRENT_VERSION = "1.1.0";
-const VERSION_KEY = "astral_seen_version";
-const batchSize = 48;
 
 function checkVersionModal() {
   const seenVersion = localStorage.getItem(VERSION_KEY);
@@ -208,7 +201,7 @@ async function openInAboutBlank(targetUrlParam) {
 
     const win = window.open("about:blank", "_blank");
     if (!win) {
-      alert("Please allow popups for tab cloaking to work. sonion 🫪");
+      alert("Please allow popups for tab cloaking to work.");
       return;
     }
 
@@ -317,7 +310,7 @@ function renderCategorySection(container, title, gamesList) {
   gamesList.forEach((game) => {
     const name = game.name || game.title || "Untitled Game";
     let rawIcon = game.icon || game.cover || "";
-    let imageSrc = `${ASTRAL_CDN_URL}${cleanIconPath}`;
+    let imageSrc = "assets/media/logo.svg";
 
     if (
       rawIcon &&
@@ -326,8 +319,8 @@ function renderCategorySection(container, title, gamesList) {
     ) {
       const cleanIconPath = rawIcon.replace(/^(\.\/|\/)/, "");
       imageSrc = `${ASTRAL_CDN_URL}${cleanIconPath}`;
-    } else if (!rawIcon) {
-      imageSrc = "assets/media/logo.svg";
+    } else if (rawIcon) {
+      imageSrc = rawIcon;
     }
 
     const gameId = game.file || game.url || game.name;
@@ -452,31 +445,6 @@ window.changeCategory = function () {
   applyFilters();
 };
 
-async function loadAllGames() {
-  try {
-    const t = Date.now();
-    const astralResponse = await fetch(`${BOOKS_CDN_URL}astral.json?t=${t}`);
-    const astralGames = await astralResponse.json();
-
-    const gnMathResponse = await fetch(`${BOOKS_CDN_URL}gn-math.json?t=${t}`);
-    const gnMathGames = await gnMathResponse.json();
-
-    const ugsResponse = await fetch(`${BOOKS_CDN_URL}ugs.json?t=${t}`);
-    const ugsGames = await ugsResponse.json();
-
-    const seraphResponse = await fetch(`${BOOKS_CDN_URL}seraph.json?t=${t}`);
-    const seraphGames = await seraphResponse.json();
-
-    allGames = [...astralGames, ...gnMathGames, ...ugsGames, ...seraphGames];
-    window.currentMatchedGames = allGames;
-
-    updateCategoryDropdown();
-    applyFilters();
-  } catch (error) {
-    console.error("Error loading games:", error);
-  }
-}
-
 function closeGame() {
   const gameModal = document.getElementById("game-modal");
   const gameFrame = document.getElementById("game-frame");
@@ -547,6 +515,7 @@ function setTabCloak(presetKey) {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+  loadAllGames();
   loadPanicUrlSetting();
   loadAutoCloakSetting();
 
@@ -677,7 +646,7 @@ window.addEventListener("keydown", (e) => {
 });
 
 window.addEventListener("scroll", () => {
-  const scrollPosition = window.innerHeight + window.scrollY;
+  const scrollPosition = Math.ceil(window.innerHeight + window.scrollY);
   const threshold = document.body.offsetHeight - 500;
 
   const totalMatched = window.currentMatchedGames
