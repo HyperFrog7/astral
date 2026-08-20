@@ -289,6 +289,8 @@ function renderCategorySection(container, title, gamesList) {
     ) {
       const cleanIconPath = rawIcon.replace(/^(\.\/|\/)/, "");
       imageSrc = `${ASTRAL_CDN_URL}${cleanIconPath}`;
+    } else if (!rawIcon) {
+      imageSrc = "assets/media/logo.svg";
     }
 
     const gameId = game.file || game.url || game.name;
