@@ -325,14 +325,12 @@ function renderCategorySection(container, title, gamesList) {
 
       const category = getCategoryKey(game);
       if (category === "GN-Math") {
-        // Strip out old prefixes and force into assets/media/gn-math/
         cleanIconPath = cleanIconPath.replace(
           /^(assets\/(images|media)\/|gn-math\/)/,
           "",
         );
         imageSrc = `${ASTRAL_CDN_URL}assets/media/gn-math/${cleanIconPath}`;
       } else {
-        // Default media folder path mapping
         cleanIconPath = cleanIconPath.replace(
           /^assets\/images\//,
           "assets/media/",
@@ -500,8 +498,10 @@ async function openGame(gameParam, fallbackPath) {
   activeGameFile = filePath;
   gameTitle.textContent = name || "Untitled Game";
 
-  const cleanPath = filePath.replace(/^(games\/|\.\/)/, "");
-  let targetUrl = `${BOOKS_CDN_URL}${cleanPath}`;
+  // Check if absolute URL, if relative ensure correct CDN mapping
+  let targetUrl = filePath.startsWith("http")
+    ? filePath
+    : `${BOOKS_CDN_URL}${filePath.replace(/^(\.\/|\/)/, "")}`;
 
   const baseUrl = targetUrl.substring(0, targetUrl.lastIndexOf("/") + 1);
 
