@@ -11,11 +11,10 @@
 
 @font-face {
     font-family: "Maple Mono";
-    src: url("https://cdn.jsdelivr.net/gh/hyperfrog7/Astral@main/assets/fonts/MapleMono[wght]-VF.woff2")
-        format("woff2-variations");
+    src: url("https://cdn.jsdelivr.net/gh/hyperfrog7/Astral@main/assets/fonts/MapleMono[wght]-VF.woff2") format("woff2");
+    font-weight: 100 900;
     font-style: normal;
     font-display: swap;
-}
 
 html,
 body {
