@@ -21,10 +21,6 @@ function getBookUrl(category, fileId) {
   return `${BOOKS_CDN_URL}${folder}/${cleanId}`;
 }
 
-function getCacheKey() {
-  return Math.floor(Date.now() / (1000 * 60 * 5));
-}
-
 let allGames = [];
 let activeGameFile = "";
 let visibleCount = 48;
@@ -201,7 +197,7 @@ function saveAutoCloakSetting() {
   localStorage.setItem("autoCloakEnabled", checkbox.checked ? "true" : "false");
 }
 
-async function openInAboutBlank(targetUrlParam) {
+async function openInAboutBlank() {
   try {
     let response = await fetch(
       `${ASTRAL_CDN_URL}assets/payloads/singlefile.html`,
@@ -259,11 +255,16 @@ function loadPanicUrlSetting() {
 }
 
 function getCategoryKey(game) {
+  const explicitCategory = (game.category || "").toLowerCase();
+  if (explicitCategory === "gn-math") return "GN-Math";
+  if (explicitCategory === "ugs") return "UGS";
+  if (explicitCategory === "seraph") return "Seraph";
+  if (explicitCategory === "astral") return "Astral";
+
   const filePath = game.file || game.url || "";
   if (filePath.includes("gn-math/")) return "GN-Math";
   if (filePath.includes("ugs/")) return "UGS";
-  if (filePath.includes("seraph/") || filePath.includes("seraph"))
-    return "Seraph";
+  if (filePath.includes("seraph/")) return "Seraph";
   return "Astral";
 }
 
@@ -345,11 +346,7 @@ function renderCategorySection(container, title, gamesList) {
 
       const category = getCategoryKey(game);
       if (category === "GN-Math") {
-        cleanIconPath = cleanIconPath.replace(
-          /^(assets\/(images|media)\/|gn-math\/)/,
-          "",
-        );
-        imageSrc = `${ASTRAL_CDN_URL}assets/media/gn-math/${cleanIconPath}`;
+        imageSrc = `${ASTRAL_CDN_URL}${cleanIconPath}`;
       } else {
         cleanIconPath = cleanIconPath.replace(
           /^assets\/images\//,
@@ -455,8 +452,7 @@ function applyFilters() {
         matchesCategory =
           !filePath.includes("gn-math/") &&
           !filePath.includes("ugs/") &&
-          !filePath.includes("seraph/") &&
-          !filePath.includes("seraph");
+          !filePath.includes("seraph/");
       } else {
         const targetPath = selectedCategory + "/";
         matchesCategory =
@@ -515,11 +511,11 @@ async function openGame(gameParam, fallbackPath) {
   addRecentlyPlayed(gameObj);
   applyFilters();
 
-  activeGameFile = filePath;
   gameTitle.textContent = name || "Untitled Game";
 
   const category = getCategoryKey(gameObj);
   let targetUrl = getBookUrl(category, filePath);
+  activeGameFile = targetUrl;
 
   const baseUrl = targetUrl.substring(0, targetUrl.lastIndexOf("/") + 1);
 
@@ -660,14 +656,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (cloakSiteBtn) {
     cloakSiteBtn.addEventListener("click", () => {
-      openInAboutBlank(window.location.href);
+      openInAboutBlank();
     });
   }
 
   if (cloakGameBtn) {
     cloakGameBtn.addEventListener("click", () => {
       if (activeGameFile) {
-        openInAboutBlank(activeGameFile);
+        window.open(activeGameFile, "_blank");
       }
     });
   }
@@ -677,7 +673,7 @@ document.addEventListener("DOMContentLoaded", () => {
     localStorage.getItem("autoCloakEnabled") === "true"
   ) {
     setTimeout(() => {
-      openInAboutBlank(window.location.href);
+      openInAboutBlank();
     }, 100);
   }
 });
