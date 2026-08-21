@@ -1,6 +1,26 @@
 const ASTRAL_CDN_URL = "https://cdn.jsdelivr.net/gh/hyperfrog7/Astral@main/";
 const BOOKS_CDN_URL = "https://cdn.jsdelivr.net/gh/HyperFrog7/books@main/";
 
+function getBookUrl(category, fileId) {
+  if (!fileId) return "";
+  if (fileId.startsWith("http")) return fileId;
+
+  const cleanId = fileId.replace(/^(\.\/|\/)/, "");
+  const catKey = (category || "").toLowerCase();
+
+  if (
+    cleanId.startsWith("gn-math/") ||
+    cleanId.startsWith("astral/") ||
+    cleanId.startsWith("seraph/") ||
+    cleanId.startsWith("ugs/")
+  ) {
+    return `${BOOKS_CDN_URL}${cleanId}`;
+  }
+
+  const folder = catKey || "astral";
+  return `${BOOKS_CDN_URL}${folder}/${cleanId}`;
+}
+
 function getCacheKey() {
   return Math.floor(Date.now() / (1000 * 60 * 5));
 }
@@ -498,10 +518,8 @@ async function openGame(gameParam, fallbackPath) {
   activeGameFile = filePath;
   gameTitle.textContent = name || "Untitled Game";
 
-  // Check if absolute URL, if relative ensure correct CDN mapping
-  let targetUrl = filePath.startsWith("http")
-    ? filePath
-    : `${BOOKS_CDN_URL}${filePath.replace(/^(\.\/|\/)/, "")}`;
+  const category = getCategoryKey(gameObj);
+  let targetUrl = getBookUrl(category, filePath);
 
   const baseUrl = targetUrl.substring(0, targetUrl.lastIndexOf("/") + 1);
 
