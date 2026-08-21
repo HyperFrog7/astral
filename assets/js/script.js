@@ -32,6 +32,8 @@ const VERSION_KEY = "astral_seen_version";
 const batchSize = 48;
 
 let changelogData = null;
+let changelogHistory = [];
+let currentHistoryIndex = 0;
 
 async function loadChangelog() {
   try {
@@ -40,9 +42,16 @@ async function loadChangelog() {
     );
     if (!response.ok) throw new Error(`HTTP error ${response.status}`);
 
-    changelogData = await response.json();
+    const rawData = await response.json();
+    changelogHistory = Array.isArray(rawData) ? rawData : [rawData];
+
+    // Start at the last item (newest version)
+    currentHistoryIndex = changelogHistory.length - 1;
+
+    changelogData = changelogHistory[currentHistoryIndex];
     renderChangelogModal(changelogData);
     checkVersionModal(changelogData.version);
+    updateChangelogNavButtons();
   } catch (error) {
     console.error("Error loading changelog:", error);
   }
@@ -68,6 +77,24 @@ function renderChangelogModal(data) {
       list.appendChild(li);
     });
   }
+}
+
+function navigateChangelog(direction) {
+  const newIndex = currentHistoryIndex + direction;
+  if (newIndex >= 0 && newIndex < changelogHistory.length) {
+    currentHistoryIndex = newIndex;
+    renderChangelogModal(changelogHistory[currentHistoryIndex]);
+    updateChangelogNavButtons();
+  }
+}
+
+function updateChangelogNavButtons() {
+  const prevBtn = document.getElementById("prev-changelog-btn");
+  const nextBtn = document.getElementById("next-changelog-btn");
+
+  if (prevBtn) prevBtn.disabled = currentHistoryIndex <= 0;
+  if (nextBtn)
+    nextBtn.disabled = currentHistoryIndex >= changelogHistory.length - 1;
 }
 
 function showLoadingState() {
@@ -139,8 +166,9 @@ function dismissVersionModal() {
   if (modal) {
     modal.classList.add("hidden");
   }
-  if (changelogData && changelogData.version) {
-    localStorage.setItem(VERSION_KEY, changelogData.version);
+  const latestRelease = changelogHistory[changelogHistory.length - 1];
+  if (latestRelease && latestRelease.version) {
+    localStorage.setItem(VERSION_KEY, latestRelease.version);
   }
 }
 
@@ -653,6 +681,8 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   const closeWhatsNewBtn = document.getElementById("close-whats-new-btn");
+  const prevChangelogBtn = document.getElementById("prev-changelog-btn");
+  const nextChangelogBtn = document.getElementById("next-changelog-btn");
   const searchInput = document.getElementById("search-input");
   const categorySelect = document.getElementById("category-select");
   const closeBtn = document.getElementById("close-btn");
@@ -669,6 +699,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (closeWhatsNewBtn) {
     closeWhatsNewBtn.addEventListener("click", dismissVersionModal);
+  }
+
+  if (prevChangelogBtn) {
+    prevChangelogBtn.addEventListener("click", () => navigateChangelog(-1));
+  }
+
+  if (nextChangelogBtn) {
+    nextChangelogBtn.addEventListener("click", () => navigateChangelog(1));
   }
 
   loadChangelog();
