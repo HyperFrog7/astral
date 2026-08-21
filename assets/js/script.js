@@ -28,11 +28,76 @@ let visibleCount = 48;
 const RECENT_KEY = "astral_recent_games";
 const FAVORITES_KEY = "astral_favorite_games";
 const COLLAPSED_KEY = "astral_collapsed_categories";
-const CURRENT_VERSION = "1.1.0";
 const VERSION_KEY = "astral_seen_version";
 const batchSize = 48;
 
+let changelogData = null;
+
+async function loadChangelog() {
+  try {
+    const response = await fetch(
+      `${ASTRAL_CDN_URL}assets/media/changelog.json?t=${Date.now()}`,
+    );
+    if (!response.ok) throw new Error(`HTTP error ${response.status}`);
+
+    changelogData = await response.json();
+    renderChangelogModal(changelogData);
+    checkVersionModal(changelogData.version);
+  } catch (error) {
+    console.error("Error loading changelog:", error);
+  }
+}
+
+function renderChangelogModal(data) {
+  if (!data) return;
+
+  const versionBadge = document.querySelector(
+    "#whats-new-modal .version-badge",
+  );
+  const tagline = document.querySelector("#whats-new-modal .release-tagline");
+  const list = document.querySelector("#whats-new-modal .changelog-list");
+
+  if (versionBadge) versionBadge.textContent = data.version || "";
+  if (tagline) tagline.textContent = data.tagline || "";
+
+  if (list) {
+    list.innerHTML = "";
+    (data.changes || []).forEach((entry) => {
+      const li = document.createElement("li");
+      li.textContent = entry;
+      list.appendChild(li);
+    });
+  }
+}
+
+function showLoadingState() {
+  const container = document.getElementById("game-grid");
+  if (!container) return;
+  container.innerHTML = `
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <p>Loading games...</p>
+    </div>
+  `;
+}
+
+function showErrorState(message) {
+  const container = document.getElementById("game-grid");
+  if (!container) return;
+  container.innerHTML = `
+    <div class="loading-state">
+      <p>${message}</p>
+      <button id="retry-load-btn" class="modal-btn">Retry</button>
+    </div>
+  `;
+  const retryBtn = document.getElementById("retry-load-btn");
+  if (retryBtn) {
+    retryBtn.addEventListener("click", loadAllGames);
+  }
+}
+
 async function loadAllGames() {
+  showLoadingState();
   try {
     const t = Date.now();
     const astralResponse = await fetch(`${BOOKS_CDN_URL}astral.json?t=${t}`);
@@ -54,13 +119,14 @@ async function loadAllGames() {
     applyFilters();
   } catch (error) {
     console.error("Error loading games:", error);
+    showErrorState("Couldn't load games. Check your connection and try again.");
   }
 }
 
-function checkVersionModal() {
+function checkVersionModal(currentVersion) {
   const seenVersion = localStorage.getItem(VERSION_KEY);
 
-  if (seenVersion !== CURRENT_VERSION) {
+  if (seenVersion !== currentVersion) {
     const modal = document.getElementById("whats-new-modal");
     if (modal) {
       modal.classList.remove("hidden");
@@ -73,7 +139,9 @@ function dismissVersionModal() {
   if (modal) {
     modal.classList.add("hidden");
   }
-  localStorage.setItem(VERSION_KEY, CURRENT_VERSION);
+  if (changelogData && changelogData.version) {
+    localStorage.setItem(VERSION_KEY, changelogData.version);
+  }
 }
 
 function getCollapsedCategories() {
@@ -298,7 +366,7 @@ function updateCategoryDropdown() {
   `;
 }
 
-function renderCategorySection(container, title, gamesList) {
+function renderCategorySection(container, title, gamesList, totalCount) {
   if (!gamesList || gamesList.length === 0) return;
 
   const favorites = getFavorites();
@@ -308,10 +376,13 @@ function renderCategorySection(container, title, gamesList) {
   const section = document.createElement("div");
   section.className = "category-section";
 
+  const displayCount =
+    typeof totalCount === "number" ? totalCount : gamesList.length;
+
   const header = document.createElement("div");
   header.className = "category-header";
   header.innerHTML = `
-    <span>${title} (${gamesList.length})</span>
+    <span>${title} (${displayCount})</span>
     <span class="toggle-icon">${isInitiallyCollapsed ? "+" : "−"}</span>
   `;
 
@@ -389,7 +460,11 @@ function renderCategorySection(container, title, gamesList) {
   container.appendChild(section);
 }
 
-function renderCategorizedGames(gamesList, isFiltered = false) {
+function renderCategorizedGames(
+  gamesList,
+  isFiltered = false,
+  categoryTotals = {},
+) {
   const container = document.getElementById("game-grid");
   if (!container) return;
 
@@ -410,7 +485,15 @@ function renderCategorizedGames(gamesList, isFiltered = false) {
 
   const grouped = groupGamesByCategory(gamesList);
   Object.keys(grouped).forEach((categoryName) => {
-    renderCategorySection(container, categoryName, grouped[categoryName]);
+    const totalForCategory = categoryTotals[categoryName]
+      ? categoryTotals[categoryName].length
+      : grouped[categoryName].length;
+    renderCategorySection(
+      container,
+      categoryName,
+      grouped[categoryName],
+      totalForCategory,
+    );
   });
 }
 
@@ -458,7 +541,8 @@ function applyFilters() {
   window.currentMatchedGames = matched;
 
   const visibleGames = matched.slice(0, visibleCount);
-  renderCategorizedGames(visibleGames, isFiltered);
+  const categoryTotals = groupGamesByCategory(matched);
+  renderCategorizedGames(visibleGames, isFiltered, categoryTotals);
 }
 
 window.searchGames = function () {
@@ -587,7 +671,7 @@ document.addEventListener("DOMContentLoaded", () => {
     closeWhatsNewBtn.addEventListener("click", dismissVersionModal);
   }
 
-  checkVersionModal();
+  loadChangelog();
 
   if (settingsIcon) {
     settingsIcon.addEventListener("click", window.openSettings);

@@ -1,0 +1,9 @@
+{
+  "version": "1.1.0",
+  "tagline": "Organized file structure + stopped file caching",
+  "changes": [
+    "moved most files into assets folder with their respecting folder like css, js, and fonts.",
+    "started working on a new file that should bypass goguardian ai.",
+    "❌ goguardian. stop spying on us and training your ai with our data"
+  ]
+}
