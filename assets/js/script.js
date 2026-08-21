@@ -529,11 +529,6 @@ async function openGame(gameParam, fallbackPath) {
 
     let htmlContent = await response.text();
 
-    htmlContent = htmlContent.replace(
-      /(assets\/fonts\/[^\s"')]+)/g,
-      `${ASTRAL_CDN_URL}$1`,
-    );
-
     if (htmlContent.includes("<head>")) {
       htmlContent = htmlContent.replace(
         "<head>",
