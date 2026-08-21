@@ -499,55 +499,68 @@ body {
     opacity: 0.9;
 }
 
-.past-updates-toggle-btn {
-    display: block;
+.modal-card-wide {
+    max-width: 560px;
+}
+
+.modal-body-split {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 12px;
+}
+
+.version-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex-shrink: 0;
+    min-width: 90px;
+    max-width: 120px;
+    max-height: 260px;
+    overflow-y: auto;
+    border-right: 1px solid var(--border);
+    padding-right: 12px;
+}
+
+.version-sidebar-item {
     background: none;
-    border: none;
-    color: var(--accent);
+    border: 1px solid transparent;
+    color: var(--text-secondary);
     font-family: inherit;
     font-size: 0.85rem;
-    text-decoration: underline;
+    font-weight: 600;
+    text-align: left;
+    padding: 6px 10px;
+    border-radius: 6px;
     cursor: pointer;
-    padding: 4px 0 12px;
-    margin: 0;
+    transition: all 0.2s ease;
 }
 
-.past-updates-toggle-btn:hover {
-    opacity: 0.8;
+.version-sidebar-item:hover {
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
 }
 
-.past-updates-list {
-    max-height: 220px;
+.version-sidebar-item.active {
+    background-color: var(--bg-secondary);
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+.version-content {
+    flex: 1;
+    min-width: 0;
+    max-height: 260px;
     overflow-y: auto;
-    border-top: 1px solid var(--border);
-    padding-top: 12px;
-    margin-bottom: 8px;
 }
 
-.past-updates-list.hidden {
-    display: none;
-}
-
-.past-update-entry {
-    margin-bottom: 16px;
-}
-
-.past-update-entry:last-child {
+.version-content .release-tagline,
+.version-content .changelog-list {
     margin-bottom: 0;
 }
 
-.past-update-header {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 6px;
-    font-size: 0.9rem;
-    color: var(--text-secondary);
-}
-
-.past-update-header .version-badge {
-    font-size: 0.75rem;
-    padding: 1px 8px;
+.version-content .release-tagline {
+    margin-bottom: 12px;
 }
 
 .settings-modal {

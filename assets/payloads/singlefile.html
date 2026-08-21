@@ -89,25 +89,18 @@
         </div>
 
         <div id="whats-new-modal" class="modal-overlay hidden">
-            <div class="modal-card">
+            <div class="modal-card modal-card-wide">
                 <div class="modal-header">
                     <h2>Astral</h2>
                     <span class="version-badge"></span>
                 </div>
 
-                <div class="modal-body">
-                    <p class="release-tagline"></p>
-                    <ul class="changelog-list"></ul>
-                    <button
-                        id="toggle-past-updates-btn"
-                        class="past-updates-toggle-btn"
-                    >
-                        Show past updates
-                    </button>
-                    <div
-                        id="past-updates-list"
-                        class="past-updates-list hidden"
-                    ></div>
+                <div class="modal-body-split">
+                    <div id="version-sidebar" class="version-sidebar"></div>
+                    <div class="version-content">
+                        <p class="release-tagline"></p>
+                        <ul class="changelog-list"></ul>
+                    </div>
                 </div>
 
                 <div class="modal-footer">

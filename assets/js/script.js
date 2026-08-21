@@ -53,65 +53,50 @@ async function loadChangelog() {
 function renderChangelogModal(entries) {
   if (!entries || entries.length === 0) return;
 
-  const latest = entries[0];
-  const olderEntries = entries.slice(1);
-
   const versionBadge = document.querySelector(
     "#whats-new-modal .modal-header .version-badge",
   );
   const tagline = document.querySelector("#whats-new-modal .release-tagline");
   const list = document.querySelector("#whats-new-modal .changelog-list");
-  const pastList = document.getElementById("past-updates-list");
-  const toggleBtn = document.getElementById("toggle-past-updates-btn");
+  const sidebar = document.getElementById("version-sidebar");
 
-  if (versionBadge) versionBadge.textContent = latest.version || "";
-  if (tagline) tagline.textContent = latest.tagline || "";
+  function showEntry(index) {
+    const entry = entries[index];
+    if (!entry) return;
 
-  if (list) {
-    list.innerHTML = "";
-    (latest.changes || []).forEach((entry) => {
-      const li = document.createElement("li");
-      li.textContent = entry;
-      list.appendChild(li);
-    });
-  }
+    if (versionBadge) versionBadge.textContent = entry.version || "";
+    if (tagline) tagline.textContent = entry.tagline || "";
 
-  if (pastList) {
-    pastList.innerHTML = "";
-    olderEntries.forEach((release) => {
-      const entrySection = document.createElement("div");
-      entrySection.className = "past-update-entry";
-
-      const header = document.createElement("div");
-      header.className = "past-update-header";
-
-      const badge = document.createElement("span");
-      badge.className = "version-badge";
-      badge.textContent = release.version || "";
-
-      const taglineSpan = document.createElement("span");
-      taglineSpan.textContent = release.tagline || "";
-
-      header.appendChild(badge);
-      header.appendChild(taglineSpan);
-
-      const ul = document.createElement("ul");
-      ul.className = "changelog-list";
-      (release.changes || []).forEach((entry) => {
+    if (list) {
+      list.innerHTML = "";
+      (entry.changes || []).forEach((change) => {
         const li = document.createElement("li");
-        li.textContent = entry;
-        ul.appendChild(li);
+        li.textContent = change;
+        list.appendChild(li);
       });
+    }
 
-      entrySection.appendChild(header);
-      entrySection.appendChild(ul);
-      pastList.appendChild(entrySection);
+    if (sidebar) {
+      Array.from(sidebar.children).forEach((child, i) => {
+        child.classList.toggle("active", i === index);
+      });
+    }
+  }
+
+  if (sidebar) {
+    sidebar.innerHTML = "";
+    entries.forEach((entry, index) => {
+      const item = document.createElement("button");
+      item.type = "button";
+      item.className = "version-sidebar-item";
+      item.textContent = entry.version || `Update ${index + 1}`;
+      item.addEventListener("click", () => showEntry(index));
+      sidebar.appendChild(item);
     });
+    sidebar.style.display = entries.length > 1 ? "" : "none";
   }
 
-  if (toggleBtn) {
-    toggleBtn.style.display = olderEntries.length > 0 ? "" : "none";
-  }
+  showEntry(0);
 }
 
 function showLoadingState() {
@@ -708,9 +693,6 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   const closeWhatsNewBtn = document.getElementById("close-whats-new-btn");
-  const togglePastUpdatesBtn = document.getElementById(
-    "toggle-past-updates-btn",
-  );
   const searchInput = document.getElementById("search-input");
   const categorySelect = document.getElementById("category-select");
   const closeBtn = document.getElementById("close-btn");
@@ -727,17 +709,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (closeWhatsNewBtn) {
     closeWhatsNewBtn.addEventListener("click", dismissVersionModal);
-  }
-
-  if (togglePastUpdatesBtn) {
-    togglePastUpdatesBtn.addEventListener("click", () => {
-      const pastList = document.getElementById("past-updates-list");
-      if (!pastList) return;
-      const isNowHidden = pastList.classList.toggle("hidden");
-      togglePastUpdatesBtn.textContent = isNowHidden
-        ? "Show past updates"
-        : "Hide past updates";
-    });
   }
 
   loadChangelog();
