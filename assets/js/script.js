@@ -32,8 +32,6 @@ const VERSION_KEY = "astral_seen_version";
 const batchSize = 48;
 
 let changelogData = null;
-let changelogHistory = [];
-let currentHistoryIndex = 0;
 
 async function loadChangelog() {
   try {
@@ -42,70 +40,96 @@ async function loadChangelog() {
     );
     if (!response.ok) throw new Error(`HTTP error ${response.status}`);
 
-    const rawData = await response.json();
-    changelogHistory = Array.isArray(rawData) ? rawData : [rawData];
+    changelogData = await response.json();
+    if (!Array.isArray(changelogData) || changelogData.length === 0) return;
 
-    // Start at the last item (newest version)
-    currentHistoryIndex = changelogHistory.length - 1;
-
-    changelogData = changelogHistory[currentHistoryIndex];
     renderChangelogModal(changelogData);
-    checkVersionModal(changelogData.version);
-    updateChangelogNavButtons();
+    checkVersionModal(changelogData[0].version);
   } catch (error) {
     console.error("Error loading changelog:", error);
   }
 }
 
-function renderChangelogModal(data) {
-  if (!data) return;
+function renderChangelogModal(entries) {
+  if (!entries || entries.length === 0) return;
+
+  const latest = entries[0];
+  const olderEntries = entries.slice(1);
 
   const versionBadge = document.querySelector(
-    "#whats-new-modal .version-badge",
+    "#whats-new-modal .modal-header .version-badge",
   );
   const tagline = document.querySelector("#whats-new-modal .release-tagline");
   const list = document.querySelector("#whats-new-modal .changelog-list");
+  const pastList = document.getElementById("past-updates-list");
+  const toggleBtn = document.getElementById("toggle-past-updates-btn");
 
-  if (versionBadge) versionBadge.textContent = data.version || "";
-  if (tagline) tagline.textContent = data.tagline || "";
+  if (versionBadge) versionBadge.textContent = latest.version || "";
+  if (tagline) tagline.textContent = latest.tagline || "";
 
   if (list) {
     list.innerHTML = "";
-    (data.changes || []).forEach((entry) => {
+    (latest.changes || []).forEach((entry) => {
       const li = document.createElement("li");
       li.textContent = entry;
       list.appendChild(li);
     });
   }
-}
 
-function navigateChangelog(direction) {
-  const newIndex = currentHistoryIndex + direction;
-  if (newIndex >= 0 && newIndex < changelogHistory.length) {
-    currentHistoryIndex = newIndex;
-    renderChangelogModal(changelogHistory[currentHistoryIndex]);
-    updateChangelogNavButtons();
+  if (pastList) {
+    pastList.innerHTML = "";
+    olderEntries.forEach((release) => {
+      const entrySection = document.createElement("div");
+      entrySection.className = "past-update-entry";
+
+      const header = document.createElement("div");
+      header.className = "past-update-header";
+
+      const badge = document.createElement("span");
+      badge.className = "version-badge";
+      badge.textContent = release.version || "";
+
+      const taglineSpan = document.createElement("span");
+      taglineSpan.textContent = release.tagline || "";
+
+      header.appendChild(badge);
+      header.appendChild(taglineSpan);
+
+      const ul = document.createElement("ul");
+      ul.className = "changelog-list";
+      (release.changes || []).forEach((entry) => {
+        const li = document.createElement("li");
+        li.textContent = entry;
+        ul.appendChild(li);
+      });
+
+      entrySection.appendChild(header);
+      entrySection.appendChild(ul);
+      pastList.appendChild(entrySection);
+    });
   }
-}
 
-function updateChangelogNavButtons() {
-  const prevBtn = document.getElementById("prev-changelog-btn");
-  const nextBtn = document.getElementById("next-changelog-btn");
-
-  if (prevBtn) prevBtn.disabled = currentHistoryIndex <= 0;
-  if (nextBtn)
-    nextBtn.disabled = currentHistoryIndex >= changelogHistory.length - 1;
+  if (toggleBtn) {
+    toggleBtn.style.display = olderEntries.length > 0 ? "" : "none";
+  }
 }
 
 function showLoadingState() {
   const container = document.getElementById("game-grid");
   if (!container) return;
-  container.innerHTML = `
-    <div class="loading-state">
-      <div class="spinner"></div>
-      <p>Loading games...</p>
-    </div>
-  `;
+
+  const skeletonCount = 18;
+  let cardsHtml = "";
+  for (let i = 0; i < skeletonCount; i++) {
+    cardsHtml += `
+      <div class="skeleton-card">
+        <div class="skeleton-icon"></div>
+        <div class="skeleton-title"></div>
+      </div>
+    `;
+  }
+
+  container.innerHTML = `<div class="skeleton-grid">${cardsHtml}</div>`;
 }
 
 function showErrorState(message) {
@@ -166,9 +190,12 @@ function dismissVersionModal() {
   if (modal) {
     modal.classList.add("hidden");
   }
-  const latestRelease = changelogHistory[changelogHistory.length - 1];
-  if (latestRelease && latestRelease.version) {
-    localStorage.setItem(VERSION_KEY, latestRelease.version);
+  if (
+    Array.isArray(changelogData) &&
+    changelogData.length > 0 &&
+    changelogData[0].version
+  ) {
+    localStorage.setItem(VERSION_KEY, changelogData[0].version);
   }
 }
 
@@ -681,8 +708,9 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   const closeWhatsNewBtn = document.getElementById("close-whats-new-btn");
-  const prevChangelogBtn = document.getElementById("prev-changelog-btn");
-  const nextChangelogBtn = document.getElementById("next-changelog-btn");
+  const togglePastUpdatesBtn = document.getElementById(
+    "toggle-past-updates-btn",
+  );
   const searchInput = document.getElementById("search-input");
   const categorySelect = document.getElementById("category-select");
   const closeBtn = document.getElementById("close-btn");
@@ -701,12 +729,15 @@ document.addEventListener("DOMContentLoaded", () => {
     closeWhatsNewBtn.addEventListener("click", dismissVersionModal);
   }
 
-  if (prevChangelogBtn) {
-    prevChangelogBtn.addEventListener("click", () => navigateChangelog(-1));
-  }
-
-  if (nextChangelogBtn) {
-    nextChangelogBtn.addEventListener("click", () => navigateChangelog(1));
+  if (togglePastUpdatesBtn) {
+    togglePastUpdatesBtn.addEventListener("click", () => {
+      const pastList = document.getElementById("past-updates-list");
+      if (!pastList) return;
+      const isNowHidden = pastList.classList.toggle("hidden");
+      togglePastUpdatesBtn.textContent = isNowHidden
+        ? "Show past updates"
+        : "Hide past updates";
+    });
   }
 
   loadChangelog();
