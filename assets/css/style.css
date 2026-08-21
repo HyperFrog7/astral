@@ -431,6 +431,38 @@ body {
     font-weight: 600;
 }
 
+/* Changelog Modal Navigation */
+.changelog-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+}
+
+.changelog-nav .nav-btn {
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border);
+    color: var(--text-primary);
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.changelog-nav .nav-btn:hover:not(:disabled) {
+    background-color: var(--accent);
+    color: var(--bg-primary);
+    border-color: var(--accent);
+}
+
+.changelog-nav .nav-btn:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+}
+
 .release-tagline {
     color: var(--text-secondary);
     font-size: 0.95rem;
