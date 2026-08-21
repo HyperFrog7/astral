@@ -11,12 +11,10 @@
 
 @font-face {
     font-family: "Maple Mono";
-    src: url("https://cdn.jsdelivr.net/gh/hyperfrog7/Astral@main/assets/fonts/MapleMono[wght]-VF.woff2")
-        format("woff2");
+    src: url("https://cdn.jsdelivr.net/gh/hyperfrog7/Astral@main/assets/fonts/MapleMono[wght]-VF.woff2") format("woff2");
     font-weight: 100 900;
     font-style: normal;
     font-display: swap;
-}
 
 html,
 body {
@@ -431,38 +429,6 @@ body {
     font-weight: 600;
 }
 
-/* Changelog Modal Navigation */
-.changelog-nav {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 16px;
-}
-
-.changelog-nav .nav-btn {
-    background-color: var(--bg-surface);
-    border: 1px solid var(--border);
-    color: var(--text-primary);
-    padding: 6px 12px;
-    border-radius: 6px;
-    font-size: 0.85rem;
-    font-family: inherit;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.changelog-nav .nav-btn:hover:not(:disabled) {
-    background-color: var(--accent);
-    color: var(--bg-primary);
-    border-color: var(--accent);
-}
-
-.changelog-nav .nav-btn:disabled {
-    opacity: 0.35;
-    cursor: not-allowed;
-}
-
 .release-tagline {
     color: var(--text-secondary);
     font-size: 0.95rem;
@@ -495,6 +461,57 @@ body {
 
 .modal-btn:hover {
     opacity: 0.9;
+}
+
+.past-updates-toggle-btn {
+    display: block;
+    background: none;
+    border: none;
+    color: var(--accent);
+    font-family: inherit;
+    font-size: 0.85rem;
+    text-decoration: underline;
+    cursor: pointer;
+    padding: 4px 0 12px;
+    margin: 0;
+}
+
+.past-updates-toggle-btn:hover {
+    opacity: 0.8;
+}
+
+.past-updates-list {
+    max-height: 220px;
+    overflow-y: auto;
+    border-top: 1px solid var(--border);
+    padding-top: 12px;
+    margin-bottom: 8px;
+}
+
+.past-updates-list.hidden {
+    display: none;
+}
+
+.past-update-entry {
+    margin-bottom: 16px;
+}
+
+.past-update-entry:last-child {
+    margin-bottom: 0;
+}
+
+.past-update-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.past-update-header .version-badge {
+    font-size: 0.75rem;
+    padding: 1px 8px;
 }
 
 .settings-modal {

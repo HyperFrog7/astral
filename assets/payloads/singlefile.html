@@ -91,33 +91,30 @@
         <div id="whats-new-modal" class="modal-overlay hidden">
             <div class="modal-card">
                 <div class="modal-header">
-                    <h2>What's New</h2>
+                    <h2>Astral</h2>
                     <span class="version-badge"></span>
                 </div>
 
-                <div class="changelog-nav">
+                <div class="modal-body">
+                    <p class="release-tagline"></p>
+                    <ul class="changelog-list"></ul>
                     <button
-                        id="prev-changelog-btn"
-                        class="nav-btn"
-                        title="Older Version"
+                        id="toggle-past-updates-btn"
+                        class="past-updates-toggle-btn"
                     >
-                        ← Older
+                        Show past updates
                     </button>
-                    <button
-                        id="next-changelog-btn"
-                        class="nav-btn"
-                        title="Newer Version"
-                    >
-                        Newer →
-                    </button>
+                    <div
+                        id="past-updates-list"
+                        class="past-updates-list hidden"
+                    ></div>
                 </div>
 
-                <p class="release-tagline"></p>
-                <ul class="changelog-list"></ul>
-
-                <button id="close-whats-new-btn" class="modal-btn">
-                    Got it
-                </button>
+                <div class="modal-footer">
+                    <button id="close-whats-new-btn" class="modal-btn">
+                        Explore Astral
+                    </button>
+                </div>
             </div>
         </div>
 
