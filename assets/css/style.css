@@ -7,6 +7,43 @@
     --text-secondary: #778da9;
     --text-primary: #e0e1dd;
     --accent: #cba6f7;
+    --accent-rgb: 203 166 247;
+}
+
+html[data-theme="crimson"] {
+    --bg-primary: #1a0e0e;
+    --bg-primary-rgb: 26 14 14;
+    --bg-secondary: #241313;
+    --bg-surface: #2e1818;
+    --border: #5c2b2b;
+    --text-secondary: #a98080;
+    --text-primary: #f2e0e0;
+    --accent: #e57373;
+    --accent-rgb: 229 115 115;
+}
+
+html[data-theme="forest"] {
+    --bg-primary: #0d1a12;
+    --bg-primary-rgb: 13 26 18;
+    --bg-secondary: #14251a;
+    --bg-surface: #1a3022;
+    --border: #2f5c40;
+    --text-secondary: #7fa98d;
+    --text-primary: #e0f2e6;
+    --accent: #81c995;
+    --accent-rgb: 129 201 149;
+}
+
+html[data-theme="amber"] {
+    --bg-primary: #1a140d;
+    --bg-primary-rgb: 26 20 13;
+    --bg-secondary: #241c13;
+    --bg-surface: #2e2418;
+    --border: #5c4a2b;
+    --text-secondary: #a99680;
+    --text-primary: #f2e8e0;
+    --accent: #e5b673;
+    --accent-rgb: 229 182 115;
 }
 
 @font-face {
@@ -666,7 +703,7 @@ body {
 #auto-cloak-checkbox:focus,
 #random-cloak-checkbox:focus {
     outline: none;
-    box-shadow: 0 0 0 2px rgba(203, 166, 247, 0.25);
+    box-shadow: 0 0 0 2px rgb(var(--accent-rgb) / 25%);
 }
 
 .settings-btn {
@@ -712,5 +749,5 @@ body {
 
 .setting-input:focus {
     border-color: var(--accent);
-    box-shadow: 0 0 0 2px rgba(203, 166, 247, 0.25);
+    box-shadow: 0 0 0 2px rgb(var(--accent-rgb) / 25%);
 }

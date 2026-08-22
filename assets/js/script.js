@@ -1,6 +1,29 @@
 const ASTRAL_CDN_URL = "https://cdn.jsdelivr.net/gh/hyperfrog7/Astral@main/";
 const BOOKS_CDN_URL = "https://cdn.jsdelivr.net/gh/HyperFrog7/books@main/";
 
+const THEME_KEY = "astral_theme";
+const THEME_PRESETS = ["default", "crimson", "forest", "amber"];
+
+function applyTheme(themeKey) {
+  const theme = THEME_PRESETS.includes(themeKey) ? themeKey : "default";
+
+  if (theme === "default") {
+    document.documentElement.removeAttribute("data-theme");
+  } else {
+    document.documentElement.setAttribute("data-theme", theme);
+  }
+
+  localStorage.setItem(THEME_KEY, theme);
+}
+
+function loadThemeSetting() {
+  const saved = localStorage.getItem(THEME_KEY) || "default";
+  applyTheme(saved);
+
+  const select = document.getElementById("theme-select");
+  if (select) select.value = saved;
+}
+
 function getBookUrl(category, fileId) {
   if (!fileId) return "";
   if (fileId.startsWith("http")) return fileId;
@@ -786,6 +809,7 @@ function setTabCloak(presetKey) {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+  loadThemeSetting();
   loadAllGames();
   loadPanicUrlSetting();
   loadAutoCloakSetting();
@@ -794,6 +818,13 @@ document.addEventListener("DOMContentLoaded", () => {
   const saveBtn = document.getElementById("save-panic-url-btn");
   if (saveBtn) {
     saveBtn.addEventListener("click", savePanicUrlSetting);
+  }
+
+  const themeSelect = document.getElementById("theme-select");
+  if (themeSelect) {
+    themeSelect.addEventListener("change", (e) => {
+      applyTheme(e.target.value);
+    });
   }
 
   const autoCloakCheckbox = document.getElementById("auto-cloak-checkbox");
