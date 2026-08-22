@@ -235,9 +235,17 @@ const cloakPresets = {
 let currentCloak = cloakPresets.default;
 
 const RANDOM_CLOAK_KEY = "astral_random_cloak_enabled";
-const RANDOM_CLOAK_INTERVAL_MS = 15000;
+const RANDOM_CLOAK_INTERVAL_KEY = "astral_random_cloak_interval_ms";
+const RANDOM_CLOAK_INTERVAL_MS = 60000;
 let randomCloakIntervalId = null;
 let lastRandomCloakKey = null;
+
+function getRandomCloakIntervalMs() {
+  const stored = parseInt(localStorage.getItem(RANDOM_CLOAK_INTERVAL_KEY), 10);
+  return Number.isFinite(stored) && stored > 0
+    ? stored
+    : RANDOM_CLOAK_INTERVAL_MS;
+}
 
 function getRandomCloakKeys() {
   return Object.keys(cloakPresets).filter((key) => key !== "default");
@@ -271,7 +279,7 @@ function startRandomCloak() {
   applyRandomCloak();
   randomCloakIntervalId = setInterval(
     applyRandomCloak,
-    RANDOM_CLOAK_INTERVAL_MS,
+    getRandomCloakIntervalMs(),
   );
 }
 
@@ -285,12 +293,29 @@ function stopRandomCloak() {
 function loadRandomCloakSetting() {
   const checkbox = document.getElementById("random-cloak-checkbox");
   const cloakPresetSelect = document.getElementById("cloak-preset-select");
+  const intervalSelect = document.getElementById(
+    "random-cloak-interval-select",
+  );
   const enabled = localStorage.getItem(RANDOM_CLOAK_KEY) === "true";
 
   if (checkbox) checkbox.checked = enabled;
   if (cloakPresetSelect) cloakPresetSelect.disabled = enabled;
+  if (intervalSelect) intervalSelect.value = String(getRandomCloakIntervalMs());
 
   if (enabled) {
+    startRandomCloak();
+  }
+}
+
+function saveRandomCloakInterval() {
+  const intervalSelect = document.getElementById(
+    "random-cloak-interval-select",
+  );
+  if (!intervalSelect) return;
+
+  localStorage.setItem(RANDOM_CLOAK_INTERVAL_KEY, intervalSelect.value);
+
+  if (localStorage.getItem(RANDOM_CLOAK_KEY) === "true") {
     startRandomCloak();
   }
 }
@@ -784,6 +809,16 @@ document.addEventListener("DOMContentLoaded", () => {
   const randomCloakCheckbox = document.getElementById("random-cloak-checkbox");
   if (randomCloakCheckbox) {
     randomCloakCheckbox.addEventListener("change", saveRandomCloakSetting);
+  }
+
+  const randomCloakIntervalSelect = document.getElementById(
+    "random-cloak-interval-select",
+  );
+  if (randomCloakIntervalSelect) {
+    randomCloakIntervalSelect.addEventListener(
+      "change",
+      saveRandomCloakInterval,
+    );
   }
 
   const closeWhatsNewBtn = document.getElementById("close-whats-new-btn");
