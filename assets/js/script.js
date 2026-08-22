@@ -234,6 +234,85 @@ const cloakPresets = {
 
 let currentCloak = cloakPresets.default;
 
+const RANDOM_CLOAK_KEY = "astral_random_cloak_enabled";
+const RANDOM_CLOAK_INTERVAL_MS = 15000;
+let randomCloakIntervalId = null;
+let lastRandomCloakKey = null;
+
+function getRandomCloakKeys() {
+  return Object.keys(cloakPresets).filter((key) => key !== "default");
+}
+
+function applyRandomCloak() {
+  const keys = getRandomCloakKeys();
+  if (keys.length === 0) return;
+
+  let nextKey;
+  do {
+    nextKey = keys[Math.floor(Math.random() * keys.length)];
+  } while (keys.length > 1 && nextKey === lastRandomCloakKey);
+
+  lastRandomCloakKey = nextKey;
+  const preset = cloakPresets[nextKey] || cloakPresets.default;
+
+  document.title = preset.title;
+
+  let link = document.querySelector("link[rel*='icon']");
+  if (!link) {
+    link = document.createElement("link");
+    link.rel = "shortcut icon";
+    document.head.appendChild(link);
+  }
+  link.href = preset.icon;
+}
+
+function startRandomCloak() {
+  stopRandomCloak();
+  applyRandomCloak();
+  randomCloakIntervalId = setInterval(
+    applyRandomCloak,
+    RANDOM_CLOAK_INTERVAL_MS,
+  );
+}
+
+function stopRandomCloak() {
+  if (randomCloakIntervalId) {
+    clearInterval(randomCloakIntervalId);
+    randomCloakIntervalId = null;
+  }
+}
+
+function loadRandomCloakSetting() {
+  const checkbox = document.getElementById("random-cloak-checkbox");
+  const cloakPresetSelect = document.getElementById("cloak-preset-select");
+  const enabled = localStorage.getItem(RANDOM_CLOAK_KEY) === "true";
+
+  if (checkbox) checkbox.checked = enabled;
+  if (cloakPresetSelect) cloakPresetSelect.disabled = enabled;
+
+  if (enabled) {
+    startRandomCloak();
+  }
+}
+
+function saveRandomCloakSetting() {
+  const checkbox = document.getElementById("random-cloak-checkbox");
+  const cloakPresetSelect = document.getElementById("cloak-preset-select");
+  if (!checkbox) return;
+
+  const enabled = checkbox.checked;
+  localStorage.setItem(RANDOM_CLOAK_KEY, enabled ? "true" : "false");
+  if (cloakPresetSelect) cloakPresetSelect.disabled = enabled;
+
+  if (enabled) {
+    startRandomCloak();
+  } else {
+    stopRandomCloak();
+    const savedCloak = localStorage.getItem("selectedCloak") || "default";
+    setTabCloak(savedCloak);
+  }
+}
+
 function getFavorites() {
   return JSON.parse(localStorage.getItem(FAVORITES_KEY)) || [];
 }
@@ -303,6 +382,10 @@ function saveAutoCloakSetting() {
   if (!checkbox) return;
 
   localStorage.setItem("autoCloakEnabled", checkbox.checked ? "true" : "false");
+
+  if (checkbox.checked) {
+    openInAboutBlank();
+  }
 }
 
 async function openInAboutBlank() {
@@ -324,6 +407,11 @@ async function openInAboutBlank() {
     let htmlContent = await response.text();
 
     htmlContent = htmlContent.replace(/assets\/images\//g, "assets/media/");
+    htmlContent = htmlContent.replace(
+      /<head(\s[^>]*)?>/i,
+      (match) =>
+        `${match}<script>window.__ASTRAL_SKIP_AUTOCLOAK = true;</script>`,
+    );
 
     const win = window.open("about:blank", "_blank");
     if (!win) {
@@ -679,6 +767,7 @@ document.addEventListener("DOMContentLoaded", () => {
   loadAllGames();
   loadPanicUrlSetting();
   loadAutoCloakSetting();
+  loadRandomCloakSetting();
 
   const saveBtn = document.getElementById("save-panic-url-btn");
   if (saveBtn) {
@@ -690,6 +779,11 @@ document.addEventListener("DOMContentLoaded", () => {
     autoCloakCheckbox.addEventListener("change", () => {
       saveAutoCloakSetting();
     });
+  }
+
+  const randomCloakCheckbox = document.getElementById("random-cloak-checkbox");
+  if (randomCloakCheckbox) {
+    randomCloakCheckbox.addEventListener("change", saveRandomCloakSetting);
   }
 
   const closeWhatsNewBtn = document.getElementById("close-whats-new-btn");
@@ -705,7 +799,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const settingsIcon = document.getElementById("settings-icon");
 
   const savedCloak = localStorage.getItem("selectedCloak") || "default";
-  setTabCloak(savedCloak);
+  if (localStorage.getItem(RANDOM_CLOAK_KEY) !== "true") {
+    setTabCloak(savedCloak);
+  }
 
   if (closeWhatsNewBtn) {
     closeWhatsNewBtn.addEventListener("click", dismissVersionModal);
@@ -784,6 +880,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (
     window.self === window.top &&
+    !window.__ASTRAL_SKIP_AUTOCLOAK &&
     localStorage.getItem("autoCloakEnabled") === "true"
   ) {
     setTimeout(() => {

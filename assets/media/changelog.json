@@ -2,10 +2,7 @@
   {
     "version": "1.0.0",
     "tagline": "Astral Official Release",
-    "changes": [
-      "Added 2,500+ Games",
-      "Added tab cloaking and about:blank"
-    ]
+    "changes": ["Added 2,500+ Games", "Added tab cloaking and about:blank"]
   },
   {
     "version": "1.1.0",
@@ -14,6 +11,14 @@
       "moved most files into assets folder with their respecting folder like css, js, and fonts.",
       "started working on a new file that should bypass goguardian ai.",
       "❌ goguardian. stop spying on us and training your ai with our data"
+    ]
+  },
+  {
+    "version": "1.2.0",
+    "tagline": "Better g0guardian byp@ss",
+    "changes": [
+      "resources.html now uses a javascript loader so gg ai cant scan it (i think)",
+      "added auto tab cloak that chooses random site"
     ]
   }
 ]

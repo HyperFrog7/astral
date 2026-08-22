@@ -624,7 +624,8 @@ body {
     color: var(--text-primary);
 }
 
-#auto-cloak-checkbox {
+#auto-cloak-checkbox,
+#random-cloak-checkbox {
     appearance: none;
     -webkit-appearance: none;
     background-color: var(--bg-secondary);
@@ -640,16 +641,19 @@ body {
     margin: 0;
 }
 
-#auto-cloak-checkbox:hover {
+#auto-cloak-checkbox:hover,
+#random-cloak-checkbox:hover {
     border-color: var(--accent);
 }
 
-#auto-cloak-checkbox:checked {
+#auto-cloak-checkbox:checked,
+#random-cloak-checkbox:checked {
     background-color: var(--accent);
     border-color: var(--accent);
 }
 
-#auto-cloak-checkbox:checked::after {
+#auto-cloak-checkbox:checked::after,
+#random-cloak-checkbox:checked::after {
     content: "";
     width: 4px;
     height: 8px;
@@ -659,7 +663,8 @@ body {
     margin-bottom: 2px;
 }
 
-#auto-cloak-checkbox:focus {
+#auto-cloak-checkbox:focus,
+#random-cloak-checkbox:focus {
     outline: none;
     box-shadow: 0 0 0 2px rgba(203, 166, 247, 0.25);
 }
