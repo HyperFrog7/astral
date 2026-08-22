@@ -647,13 +647,51 @@ body {
 .settings-body {
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 22px;
+}
+
+.settings-section {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.settings-section-title {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 6px;
 }
 
 .settings-option {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 12px;
+}
+
+.settings-option select.settings-btn {
+    min-width: 160px;
+}
+
+.settings-option-stacked {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+}
+
+.panic-url-row {
+    display: flex;
+    gap: 8px;
+    width: 100%;
+}
+
+.panic-url-row .setting-input {
+    flex: 1;
+    max-width: none;
 }
 
 .settings-option span {

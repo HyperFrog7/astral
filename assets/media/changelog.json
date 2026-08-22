@@ -18,7 +18,8 @@
     "tagline": "Better g0guardian byp@ss",
     "changes": [
       "resources.html now uses a javascript loader so gg ai cant scan it (i think)",
-      "added auto tab cloak that chooses random site"
+      "added auto tab cloak that chooses random site",
+      "polished settings + added themes"
     ]
   }
 ]

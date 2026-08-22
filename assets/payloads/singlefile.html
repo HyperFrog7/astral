@@ -123,65 +123,90 @@
                     </button>
                 </div>
                 <div class="settings-body">
-                    <div class="settings-option">
-                        <span>Theme</span>
-                        <select id="theme-select" class="settings-btn">
-                            <option value="default">Astral (Default)</option>
-                            <option value="crimson">Crimson</option>
-                            <option value="forest">Forest</option>
-                            <option value="amber">Amber</option>
-                        </select>
+                    <div class="settings-section">
+                        <div class="settings-section-title">Appearance</div>
+                        <div class="settings-option">
+                            <span>Theme</span>
+                            <select id="theme-select" class="settings-btn">
+                                <option value="default">
+                                    Astral (Default)
+                                </option>
+                                <option value="crimson">Crimson</option>
+                                <option value="forest">Forest</option>
+                                <option value="amber">Amber</option>
+                            </select>
+                        </div>
                     </div>
-                    <div class="settings-option">
-                        <span>Tab Cloak</span>
-                        <select id="cloak-preset-select" class="settings-btn">
-                            <option value="default">Default (Astral)</option>
-                            <option value="clever">Clever</option>
-                            <option value="grades">Grades</option>
-                            <option value="google">Google</option>
-                            <option value="drive">Google Drive</option>
-                            <option value="classroom">Google Classroom</option>
-                            <option value="newtab">New Tab</option>
-                        </select>
+
+                    <div class="settings-section">
+                        <div class="settings-section-title">Tab Cloaking</div>
+                        <div class="settings-option">
+                            <span>Tab Cloak</span>
+                            <select
+                                id="cloak-preset-select"
+                                class="settings-btn"
+                            >
+                                <option value="default">
+                                    Default (Astral)
+                                </option>
+                                <option value="clever">Clever</option>
+                                <option value="grades">Grades</option>
+                                <option value="google">Google</option>
+                                <option value="drive">Google Drive</option>
+                                <option value="classroom">
+                                    Google Classroom
+                                </option>
+                                <option value="newtab">New Tab</option>
+                            </select>
+                        </div>
+                        <div class="settings-option">
+                            <span>Randomize Tab Cloak</span>
+                            <input type="checkbox" id="random-cloak-checkbox" />
+                        </div>
+                        <div class="settings-option">
+                            <span>Cloak Rotation Interval</span>
+                            <select
+                                id="random-cloak-interval-select"
+                                class="settings-btn"
+                            >
+                                <option value="5000">5s</option>
+                                <option value="10000">10s</option>
+                                <option value="15000">15s</option>
+                                <option value="30000">30s</option>
+                                <option value="60000" selected>60s</option>
+                            </select>
+                        </div>
                     </div>
-                    <div class="settings-option">
-                        <span>Randomize Tab Cloak</span>
-                        <input type="checkbox" id="random-cloak-checkbox" />
-                    </div>
-                    <div class="settings-option">
-                        <span>Cloak Rotation Interval</span>
-                        <select
-                            id="random-cloak-interval-select"
-                            class="settings-btn"
-                        >
-                            <option value="5000">5s</option>
-                            <option value="10000">10s</option>
-                            <option value="15000">15s</option>
-                            <option value="30000">30s</option>
-                            <option value="60000" selected>60s</option>
-                        </select>
-                    </div>
-                    <div class="settings-option">
-                        <span>Cloak Entire Site</span>
-                        <button id="cloak-site-btn" class="settings-btn">
-                            Launch in about:blank
-                        </button>
-                    </div>
-                    <div class="settings-option">
-                        <label for="panic-url-input">Panic URL</label>
-                        <input
-                            class="setting-input"
-                            type="url"
-                            id="panic-url-input"
-                            placeholder="https://sonion.com"
-                        />
-                        <button id="save-panic-url-btn" class="settings-btn">
-                            Save
-                        </button>
-                    </div>
-                    <div class="settings-option">
-                        <span>Auto about:blank</span>
-                        <input type="checkbox" id="auto-cloak-checkbox" />
+
+                    <div class="settings-section">
+                        <div class="settings-section-title">Safety</div>
+                        <div class="settings-option">
+                            <span>Cloak Entire Site</span>
+                            <button id="cloak-site-btn" class="settings-btn">
+                                Launch in about:blank
+                            </button>
+                        </div>
+                        <div class="settings-option settings-option-stacked">
+                            <label for="panic-url-input">Panic URL</label>
+                            <div class="panic-url-row">
+                                <input
+                                    class="setting-input"
+                                    type="url"
+                                    id="panic-url-input"
+                                    placeholder="https://sonion.com"
+                                />
+                                <button
+                                    id="save-panic-url-btn"
+                                    class="settings-btn"
+                                >
+                                    Save
+                                </button>
+                            </div>
+                        </div>
+                        <div class="settings-option">
+                            <span>Auto about:blank</span>
+                            <input type="checkbox" id="auto-cloak-checkbox" />
+                        </div>
                     </div>
                 </div>
             </div>
