@@ -248,7 +248,18 @@ function getRandomCloakIntervalMs() {
 }
 
 function getRandomCloakKeys() {
-  return Object.keys(cloakPresets).filter((key) => key !== "default");
+  return Object.keys(cloakPresets).filter(
+    (key) => key !== "default" && key !== "newtab",
+  );
+}
+
+function setFavicon(iconUrl) {
+  document.querySelectorAll("link[rel*='icon']").forEach((el) => el.remove());
+
+  const link = document.createElement("link");
+  link.rel = "shortcut icon";
+  link.href = iconUrl;
+  document.head.appendChild(link);
 }
 
 function applyRandomCloak() {
@@ -264,14 +275,7 @@ function applyRandomCloak() {
   const preset = cloakPresets[nextKey] || cloakPresets.default;
 
   document.title = preset.title;
-
-  let link = document.querySelector("link[rel*='icon']");
-  if (!link) {
-    link = document.createElement("link");
-    link.rel = "shortcut icon";
-    document.head.appendChild(link);
-  }
-  link.href = preset.icon;
+  setFavicon(preset.icon);
 }
 
 function startRandomCloak() {
@@ -776,14 +780,7 @@ function setTabCloak(presetKey) {
   currentCloak = preset;
 
   document.title = preset.title;
-
-  let link = document.querySelector("link[rel*='icon']");
-  if (!link) {
-    link = document.createElement("link");
-    link.rel = "shortcut icon";
-    document.head.appendChild(link);
-  }
-  link.href = preset.icon;
+  setFavicon(preset.icon);
 
   localStorage.setItem("selectedCloak", presetKey);
 }
