@@ -28,17 +28,19 @@ function getBookUrl(category, fileId) {
   if (!fileId) return "";
   if (fileId.startsWith("http")) return fileId;
 
-  const cleanId = fileId.replace(/^(\.\/|\/)/, "");
+  let cleanId = fileId.replace(/^(\.\/|\/)/, "");
   const catKey = (category || "").toLowerCase();
 
-  const alreadyQualified =
+  if (catKey && cleanId.startsWith(`games/${catKey}/`)) {
+    cleanId = cleanId.slice("games/".length);
+  }
+
+  if (
     cleanId.startsWith("gn-math/") ||
     cleanId.startsWith("astral/") ||
     cleanId.startsWith("seraph/") ||
-    cleanId.startsWith("ugs/") ||
-    (catKey && cleanId.startsWith(`games/${catKey}/`));
-
-  if (alreadyQualified) {
+    cleanId.startsWith("ugs/")
+  ) {
     return `${BOOKS_CDN_URL}${cleanId}`;
   }
 
