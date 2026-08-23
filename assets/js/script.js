@@ -31,12 +31,14 @@ function getBookUrl(category, fileId) {
   const cleanId = fileId.replace(/^(\.\/|\/)/, "");
   const catKey = (category || "").toLowerCase();
 
-  if (
+  const alreadyQualified =
     cleanId.startsWith("gn-math/") ||
     cleanId.startsWith("astral/") ||
     cleanId.startsWith("seraph/") ||
-    cleanId.startsWith("ugs/")
-  ) {
+    cleanId.startsWith("ugs/") ||
+    (catKey && cleanId.startsWith(`games/${catKey}/`));
+
+  if (alreadyQualified) {
     return `${BOOKS_CDN_URL}${cleanId}`;
   }
 
