@@ -62,6 +62,83 @@ body {
     color: var(--text-primary);
     margin: 0;
     padding: 0;
+    height: 100%;
+}
+
+body {
+    position: relative;
+}
+
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background-repeat: repeat;
+    background-size: 480px 480px;
+    background-image:
+        radial-gradient(
+            1px 1px at 8% 18%,
+            rgba(255, 255, 255, 0.55),
+            transparent
+        ),
+        radial-gradient(
+            1px 1px at 27% 64%,
+            rgba(255, 255, 255, 0.35),
+            transparent
+        ),
+        radial-gradient(
+            1.5px 1.5px at 46% 12%,
+            rgb(var(--accent-rgb) / 55%),
+            transparent
+        ),
+        radial-gradient(
+            1px 1px at 63% 47%,
+            rgba(255, 255, 255, 0.45),
+            transparent
+        ),
+        radial-gradient(
+            1px 1px at 81% 76%,
+            rgb(var(--accent-rgb) / 40%),
+            transparent
+        ),
+        radial-gradient(
+            1.5px 1.5px at 14% 83%,
+            rgba(255, 255, 255, 0.3),
+            transparent
+        ),
+        radial-gradient(
+            1px 1px at 92% 23%,
+            rgba(255, 255, 255, 0.5),
+            transparent
+        ),
+        radial-gradient(
+            1px 1px at 41% 42%,
+            rgb(var(--accent-rgb) / 35%),
+            transparent
+        ),
+        radial-gradient(
+            1px 1px at 57% 91%,
+            rgba(255, 255, 255, 0.4),
+            transparent
+        ),
+        radial-gradient(
+            1.5px 1.5px at 22% 38%,
+            rgba(255, 255, 255, 0.5),
+            transparent
+        );
+    animation: astral-twinkle 9s ease-in-out infinite;
+}
+
+@keyframes astral-twinkle {
+    0%,
+    100% {
+        opacity: 0.75;
+    }
+    50% {
+        opacity: 1;
+    }
 }
 
 ::-webkit-scrollbar {
@@ -96,7 +173,10 @@ body {
     grid-template-columns: 1fr auto 1fr;
     align-items: center;
     background-color: var(--bg-surface);
-    border-bottom: 2px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    box-shadow:
+        0 1px 0 rgb(var(--accent-rgb) / 12%),
+        0 4px 20px rgba(0, 0, 0, 0.25);
     padding: 12px 24px;
 }
 
@@ -109,6 +189,8 @@ body {
 .navbar-start h1 {
     margin: 0;
     line-height: 1;
+    letter-spacing: 0.04em;
+    font-weight: 700;
 }
 
 .navbar-center {
@@ -172,11 +254,6 @@ body {
 #category-select option {
     background-color: var(--bg-surface);
     color: var(--text-primary);
-}
-
-.navbar-end {
-    display: flex;
-    justify-content: flex-end;
 }
 
 #settings-icon {
@@ -289,6 +366,7 @@ body {
     user-select: none;
     font-weight: 600;
     font-size: 1.1rem;
+    letter-spacing: 0.02em;
     transition:
         background-color 0.2s ease,
         border-color 0.2s ease;
@@ -339,7 +417,10 @@ body {
 .game-card:hover {
     transform: translateY(-4px);
     border-color: var(--accent);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    box-shadow:
+        0 8px 20px rgba(0, 0, 0, 0.35),
+        0 0 0 1px rgb(var(--accent-rgb) / 15%),
+        0 0 24px rgb(var(--accent-rgb) / 20%);
 }
 
 .fav-btn {
@@ -490,6 +571,7 @@ body {
 .modal-header h2 {
     margin: 0;
     color: var(--text-primary);
+    letter-spacing: 0.02em;
 }
 
 .version-badge {
@@ -533,7 +615,9 @@ body {
 }
 
 .modal-btn:hover {
-    opacity: 0.9;
+    opacity: 1;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px rgb(var(--accent-rgb) / 35%);
 }
 
 .modal-card-wide {
@@ -790,37 +874,11 @@ body {
     box-shadow: 0 0 0 2px rgb(var(--accent-rgb) / 25%);
 }
 
-#chat-icon {
-    width: 24px;
-    height: 24px;
-    color: var(--text-primary);
-    cursor: pointer;
-    transition: color 0.2s ease;
-}
-
-#chat-icon:hover {
-    color: var(--accent);
-}
-
 .navbar-end {
     display: flex;
     align-items: center;
+    justify-content: flex-end;
     gap: 16px;
-}
-
-.chat-modal {
-    position: fixed;
-    inset: 0;
-    background-color: rgb(var(--bg-primary-rgb) / 85%);
-    backdrop-filter: blur(4px);
-    z-index: 10000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.chat-modal.hidden {
-    display: none !important;
 }
 
 .chat-container {
@@ -1047,6 +1105,7 @@ body {
     color: var(--bg-primary);
     border-color: var(--accent);
     transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgb(var(--accent-rgb) / 30%);
 }
 
 .standalone-chat-page {
@@ -1057,6 +1116,9 @@ body {
 }
 
 .chat-app-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     padding: 16px 24px;
     border-bottom: 2px solid var(--border);
     background-color: var(--bg-surface);
@@ -1065,6 +1127,8 @@ body {
 
 .chat-app-header .title {
     margin: 0;
+    letter-spacing: 0.04em;
+    font-weight: 700;
 }
 
 .chat-container-standalone {
@@ -1077,12 +1141,6 @@ body {
     border: none;
     border-radius: 0;
     box-shadow: none;
-}
-
-.chat-app-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
 }
 
 .chat-app-header-user {
@@ -1121,4 +1179,121 @@ body {
 
 .auth-toggle-btn:hover {
     opacity: 0.8;
+}
+
+@media (max-width: 768px) {
+    .navbar {
+        display: flex;
+        flex-wrap: wrap;
+        row-gap: 10px;
+        padding: 10px 16px;
+    }
+
+    .navbar-start {
+        order: 1;
+    }
+
+    .navbar-end {
+        order: 2;
+    }
+
+    .navbar-center {
+        order: 3;
+        flex: 1 1 100%;
+        justify-content: stretch;
+    }
+
+    .navbar-search {
+        min-width: 0;
+        width: 100%;
+    }
+
+    .navbar-start h1 {
+        font-size: 1.1rem;
+    }
+
+    #game-grid {
+        padding: 12px;
+    }
+
+    .category-grid,
+    .skeleton-grid {
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        gap: 0.75rem;
+    }
+
+    .modal-card,
+    .settings-content {
+        width: 95%;
+    }
+
+    .modal-body-split {
+        flex-direction: column;
+    }
+
+    .version-sidebar {
+        flex-direction: row;
+        flex-wrap: wrap;
+        max-width: none;
+        max-height: none;
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+        padding-right: 0;
+        padding-bottom: 8px;
+    }
+
+    .version-content {
+        max-height: none;
+    }
+
+    .chat-container,
+    .chat-container-standalone {
+        flex-direction: column;
+        height: 100%;
+    }
+
+    .chat-sidebar {
+        width: 100%;
+        max-height: 140px;
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .server-list {
+        flex-direction: row;
+        flex-wrap: wrap;
+    }
+
+    .server-list-item {
+        white-space: normal;
+    }
+
+    .chat-app-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .app-picker-options {
+        flex-direction: column;
+        width: 100%;
+        max-width: 280px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    body::before {
+        animation: none;
+    }
+
+    .skeleton-icon,
+    .skeleton-title {
+        animation: none;
+    }
+
+    .game-card,
+    .app-picker-btn,
+    .modal-btn {
+        transition: none;
+    }
 }
