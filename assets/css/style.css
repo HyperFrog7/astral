@@ -1078,3 +1078,47 @@ body {
     border-radius: 0;
     box-shadow: none;
 }
+
+.chat-app-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.chat-app-header-user {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.auth-password-input {
+    margin-top: 10px;
+}
+
+.auth-error {
+    color: #e57373;
+    font-size: 0.85rem;
+    margin: 10px 0 0;
+}
+
+.auth-error.hidden {
+    display: none;
+}
+
+.auth-toggle-btn {
+    background: none;
+    border: none;
+    color: var(--accent);
+    font-family: inherit;
+    font-size: 0.85rem;
+    text-decoration: underline;
+    cursor: pointer;
+    padding: 8px 0 0;
+    width: 100%;
+}
+
+.auth-toggle-btn:hover {
+    opacity: 0.8;
+}

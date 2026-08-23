@@ -12,6 +12,12 @@
         <div class="standalone-chat-page">
             <div class="chat-app-header">
                 <h1 class="title">Astral Chat</h1>
+                <div class="chat-app-header-user">
+                    <span id="current-user-label"></span>
+                    <button id="logout-btn" class="chat-icon-btn">
+                        Log out
+                    </button>
+                </div>
             </div>
 
             <div class="chat-container chat-container-standalone">
@@ -74,23 +80,35 @@
             </div>
         </div>
 
-        <div id="chat-username-modal" class="modal-overlay hidden">
+        <div id="chat-auth-overlay" class="modal-overlay">
             <div class="modal-card">
                 <div class="modal-header">
-                    <h2>Choose a display name</h2>
+                    <h2 id="auth-title">Log In</h2>
                 </div>
                 <div class="modal-body">
                     <input
-                        id="chat-username-input"
+                        id="auth-username-input"
                         class="setting-input chat-modal-input"
                         type="text"
-                        placeholder="Display name"
+                        placeholder="Username"
                         maxlength="20"
+                        autocomplete="username"
                     />
+                    <input
+                        id="auth-password-input"
+                        class="setting-input chat-modal-input auth-password-input"
+                        type="password"
+                        placeholder="Password"
+                        autocomplete="current-password"
+                    />
+                    <p id="auth-error" class="auth-error hidden"></p>
                 </div>
                 <div class="modal-footer">
-                    <button id="confirm-username-btn" class="modal-btn">
-                        Continue
+                    <button id="auth-submit-btn" class="modal-btn">
+                        Log In
+                    </button>
+                    <button id="auth-toggle-btn" class="auth-toggle-btn">
+                        Need an account? Sign up
                     </button>
                 </div>
             </div>

@@ -87,8 +87,6 @@
     const chatBtn = document.getElementById("pick-chat-btn");
 
     if (!booksBtn && !chatBtn) {
-      // No picker UI on this page (e.g. study.svg) - preserve old
-      // behavior and load the games app directly.
       loadBooks();
       return;
     }

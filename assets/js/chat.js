@@ -1,18 +1,24 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
 import {
+  getAuth,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  onAuthStateChanged,
+  signOut,
+} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+import {
   getFirestore,
   collection,
   addDoc,
+  doc,
+  getDoc,
+  setDoc,
   onSnapshot,
   query,
   orderBy,
   limit,
   serverTimestamp,
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
-
-// TODO: replace with your own Firebase project's config if you ever fork this.
-// This apiKey is not a secret for client-side Firebase apps - access control comes from
-// your Firestore security rules, not from hiding this object.
 
 const firebaseConfig = {
   apiKey: "AIzaSyCIbTsR_RBitdxuU2mxzP_heEA1kykO_fw",
@@ -25,58 +31,125 @@ const firebaseConfig = {
   measurementId: "G-LMQJSMTXSX",
 };
 
+const FAKE_EMAIL_DOMAIN = "astral.chat";
+
 const firebaseApp = initializeApp(firebaseConfig);
+const auth = getAuth(firebaseApp);
 const db = getFirestore(firebaseApp);
 
-const USERNAME_KEY = "astral_chat_username";
-
+let currentUser = null;
+let currentUsername = "";
 let currentServerId = null;
 let unsubscribeMessages = null;
-
-function getUsername() {
-  return localStorage.getItem(USERNAME_KEY) || "";
-}
-
-function setUsername(name) {
-  localStorage.setItem(USERNAME_KEY, name);
-}
+let authMode = "login";
 
 function sanitizeName(name, maxLen) {
   return (name || "").trim().slice(0, maxLen);
 }
 
-function ensureUsername(callback) {
-  const existing = getUsername();
-  if (existing) {
-    callback(existing);
-    return;
+function usernameToEmail(username) {
+  return `${username.toLowerCase()}@${FAKE_EMAIL_DOMAIN}`;
+}
+
+function showAuthError(message) {
+  const el = document.getElementById("auth-error");
+  if (!el) return;
+  el.textContent = message;
+  el.classList.remove("hidden");
+}
+
+function clearAuthError() {
+  const el = document.getElementById("auth-error");
+  if (!el) return;
+  el.textContent = "";
+  el.classList.add("hidden");
+}
+
+function setAuthMode(mode) {
+  authMode = mode;
+  clearAuthError();
+
+  const title = document.getElementById("auth-title");
+  const submitBtn = document.getElementById("auth-submit-btn");
+  const toggleBtn = document.getElementById("auth-toggle-btn");
+
+  if (mode === "signup") {
+    if (title) title.textContent = "Sign Up";
+    if (submitBtn) submitBtn.textContent = "Sign Up";
+    if (toggleBtn) toggleBtn.textContent = "Already have an account? Log in";
+  } else {
+    if (title) title.textContent = "Log In";
+    if (submitBtn) submitBtn.textContent = "Log In";
+    if (toggleBtn) toggleBtn.textContent = "Need an account? Sign up";
+  }
+}
+
+async function handleSignUp(username, password) {
+  const cleanUsername = sanitizeName(username, 20);
+  if (!cleanUsername) throw new Error("Enter a username.");
+  if (!/^[a-zA-Z0-9_]+$/.test(cleanUsername)) {
+    throw new Error("Username can only contain letters, numbers, and _");
+  }
+  if (!password || password.length < 6) {
+    throw new Error("Password must be at least 6 characters.");
   }
 
-  const modal = document.getElementById("chat-username-modal");
-  const input = document.getElementById("chat-username-input");
-  const confirmBtn = document.getElementById("confirm-username-btn");
-  if (!modal || !input || !confirmBtn) return;
+  const usernameKey = cleanUsername.toLowerCase();
+  const usernameDocRef = doc(db, "usernames", usernameKey);
+  const usernameSnap = await getDoc(usernameDocRef);
+  if (usernameSnap.exists()) {
+    throw new Error("That username is already taken.");
+  }
 
-  modal.classList.remove("hidden");
-  input.value = "";
-  input.focus();
+  const cred = await createUserWithEmailAndPassword(
+    auth,
+    usernameToEmail(cleanUsername),
+    password,
+  );
 
-  const onConfirm = () => {
-    const name = sanitizeName(input.value, 20);
-    if (!name) return;
-    setUsername(name);
-    modal.classList.add("hidden");
-    confirmBtn.removeEventListener("click", onConfirm);
-    input.removeEventListener("keydown", onKeydown);
-    callback(name);
-  };
+  await setDoc(doc(db, "users", cred.user.uid), {
+    username: cleanUsername,
+    createdAt: serverTimestamp(),
+  });
 
-  const onKeydown = (e) => {
-    if (e.key === "Enter") onConfirm();
-  };
+  await setDoc(usernameDocRef, { uid: cred.user.uid });
+}
 
-  confirmBtn.addEventListener("click", onConfirm);
-  input.addEventListener("keydown", onKeydown);
+async function handleLogIn(username, password) {
+  const cleanUsername = sanitizeName(username, 20);
+  if (!cleanUsername || !password) {
+    throw new Error("Enter your username and password.");
+  }
+
+  await signInWithEmailAndPassword(
+    auth,
+    usernameToEmail(cleanUsername),
+    password,
+  );
+}
+
+async function handleLogOut() {
+  if (unsubscribeMessages) {
+    unsubscribeMessages();
+    unsubscribeMessages = null;
+  }
+  currentServerId = null;
+  await signOut(auth);
+}
+
+function authErrorToMessage(error) {
+  const code = error && error.code;
+  if (code === "auth/email-already-in-use")
+    return "That username is already taken.";
+  if (code === "auth/invalid-credential" || code === "auth/wrong-password") {
+    return "Incorrect username or password.";
+  }
+  if (code === "auth/user-not-found") return "No account with that username.";
+  if (code === "auth/weak-password")
+    return "Password must be at least 6 characters.";
+  if (code === "auth/too-many-requests")
+    return "Too many attempts. Try again later.";
+  return error && error.message ? error.message : "Something went wrong.";
 }
 
 function renderServerList(servers) {
@@ -224,27 +297,94 @@ async function createServer(name) {
 }
 
 async function sendMessage(text) {
-  if (!currentServerId) return;
+  if (!currentServerId || !currentUser) return;
   const cleanText = sanitizeName(text, 500);
   if (!cleanText) return;
 
-  ensureUsername(async (author) => {
+  try {
+    await addDoc(collection(db, "servers", currentServerId, "messages"), {
+      author: currentUsername,
+      uid: currentUser.uid,
+      text: cleanText,
+      createdAt: serverTimestamp(),
+    });
+  } catch (error) {
+    console.error("Error sending message:", error);
+  }
+}
+
+function showChatUI() {
+  const authOverlay = document.getElementById("chat-auth-overlay");
+  const currentUserLabel = document.getElementById("current-user-label");
+  if (authOverlay) authOverlay.classList.add("hidden");
+  if (currentUserLabel) currentUserLabel.textContent = currentUsername;
+  listenToServers();
+}
+
+function showAuthUI() {
+  const authOverlay = document.getElementById("chat-auth-overlay");
+  if (authOverlay) authOverlay.classList.remove("hidden");
+
+  const serverList = document.getElementById("server-list");
+  if (serverList) serverList.innerHTML = "";
+
+  const messages = document.getElementById("chat-messages");
+  if (messages) {
+    messages.innerHTML =
+      '<div class="chat-empty-state">Select or create a server to start chatting</div>';
+  }
+
+  const nameLabel = document.getElementById("current-server-name");
+  if (nameLabel) nameLabel.textContent = "Select a server";
+}
+
+function initAuthUI() {
+  const usernameInput = document.getElementById("auth-username-input");
+  const passwordInput = document.getElementById("auth-password-input");
+  const submitBtn = document.getElementById("auth-submit-btn");
+  const toggleBtn = document.getElementById("auth-toggle-btn");
+  const logoutBtn = document.getElementById("logout-btn");
+
+  const doSubmit = async () => {
+    clearAuthError();
+    const username = usernameInput ? usernameInput.value : "";
+    const password = passwordInput ? passwordInput.value : "";
+
     try {
-      await addDoc(collection(db, "servers", currentServerId, "messages"), {
-        author,
-        text: cleanText,
-        createdAt: serverTimestamp(),
-      });
+      if (authMode === "signup") {
+        await handleSignUp(username, password);
+      } else {
+        await handleLogIn(username, password);
+      }
+      if (passwordInput) passwordInput.value = "";
     } catch (error) {
-      console.error("Error sending message:", error);
+      showAuthError(authErrorToMessage(error));
     }
+  };
+
+  if (submitBtn) submitBtn.addEventListener("click", doSubmit);
+
+  [usernameInput, passwordInput].forEach((input) => {
+    if (!input) return;
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") doSubmit();
+    });
   });
+
+  if (toggleBtn) {
+    toggleBtn.addEventListener("click", () => {
+      setAuthMode(authMode === "login" ? "signup" : "login");
+    });
+  }
+
+  if (logoutBtn) {
+    logoutBtn.addEventListener("click", handleLogOut);
+  }
+
+  setAuthMode("login");
 }
 
 function initChatUI() {
-  const chatIcon = document.getElementById("chat-icon");
-  const chatModal = document.getElementById("chat-modal");
-  const closeChatBtn = document.getElementById("close-chat-btn");
   const createServerBtn = document.getElementById("create-server-btn");
   const createServerModal = document.getElementById("create-server-modal");
   const newServerNameInput = document.getElementById("new-server-name-input");
@@ -253,18 +393,6 @@ function initChatUI() {
   );
   const messageInput = document.getElementById("chat-message-input");
   const sendMessageBtn = document.getElementById("send-message-btn");
-
-  if (chatIcon && chatModal) {
-    chatIcon.addEventListener("click", () => {
-      chatModal.classList.remove("hidden");
-    });
-  }
-
-  if (closeChatBtn && chatModal) {
-    closeChatBtn.addEventListener("click", () => {
-      chatModal.classList.add("hidden");
-    });
-  }
 
   if (createServerBtn && createServerModal && newServerNameInput) {
     createServerBtn.addEventListener("click", () => {
@@ -302,11 +430,31 @@ function initChatUI() {
     });
   }
 
-  listenToServers();
+  initAuthUI();
+
+  onAuthStateChanged(auth, async (user) => {
+    currentUser = user;
+
+    if (user) {
+      try {
+        const userSnap = await getDoc(doc(db, "users", user.uid));
+        currentUsername = userSnap.exists()
+          ? userSnap.data().username
+          : "Unknown";
+      } catch (error) {
+        console.error("Error fetching user profile:", error);
+        currentUsername = "Unknown";
+      }
+      showChatUI();
+    } else {
+      currentUsername = "";
+      showAuthUI();
+    }
+  });
 }
 
 if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", initChatUI);
+  document.addEventListener("DOMContentLoaded", initChatUI, { once: true });
 } else {
   initChatUI();
 }
