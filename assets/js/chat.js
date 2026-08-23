@@ -41,7 +41,7 @@ let currentUser = null;
 let currentUsername = "";
 let currentServerId = null;
 let unsubscribeMessages = null;
-let authMode = "login";
+let authMode = "login"; // "login" | "signup"
 
 function sanitizeName(name, maxLen) {
   return (name || "").trim().slice(0, maxLen);
@@ -201,6 +201,12 @@ function renderMessages(messages) {
   const container = document.getElementById("chat-messages");
   if (!container) return;
 
+  const nearBottomThreshold = 80;
+  const wasNearBottom =
+    container.scrollHeight === 0 ||
+    container.scrollTop + container.clientHeight >=
+      container.scrollHeight - nearBottomThreshold;
+
   container.innerHTML = "";
 
   if (messages.length === 0) {
@@ -214,6 +220,9 @@ function renderMessages(messages) {
   messages.forEach((msg) => {
     const wrapper = document.createElement("div");
     wrapper.className = "chat-message";
+    if (currentUser && msg.uid === currentUser.uid) {
+      wrapper.classList.add("own-message");
+    }
 
     const meta = document.createElement("div");
     meta.className = "chat-message-meta";
@@ -243,7 +252,9 @@ function renderMessages(messages) {
     container.appendChild(wrapper);
   });
 
-  container.scrollTop = container.scrollHeight;
+  if (wasNearBottom) {
+    container.scrollTop = container.scrollHeight;
+  }
 }
 
 function selectServer(serverId, serverName) {
@@ -297,9 +308,9 @@ async function createServer(name) {
 }
 
 async function sendMessage(text) {
-  if (!currentServerId || !currentUser) return;
+  if (!currentServerId || !currentUser) return false;
   const cleanText = sanitizeName(text, 500);
-  if (!cleanText) return;
+  if (!cleanText) return false;
 
   try {
     await addDoc(collection(db, "servers", currentServerId, "messages"), {
@@ -308,8 +319,10 @@ async function sendMessage(text) {
       text: cleanText,
       createdAt: serverTimestamp(),
     });
+    return true;
   } catch (error) {
     console.error("Error sending message:", error);
+    return false;
   }
 }
 
