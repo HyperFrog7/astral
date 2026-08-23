@@ -79,7 +79,7 @@
   }
 
   function loadChat() {
-    loadApp("assets/payloads/chat-app.html", "assets/js/chat.js", true);
+    loadApp("assets/payloads/chat.html", "assets/js/chat.js", true);
   }
 
   function initPicker() {
