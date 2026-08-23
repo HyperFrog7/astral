@@ -10,9 +10,23 @@
     </head>
     <body>
         <div id="app-root">
-            <div style="padding: 40px">
-                <h2>Loading Resources...</h2>
-                <p>Connecting to reference database.</p>
+            <div class="app-picker">
+                <img
+                    src="assets/media/logo.svg"
+                    alt="Astral"
+                    width="64"
+                    height="64"
+                />
+                <h2>Astral Resources</h2>
+                <p>Choose what to load</p>
+                <div class="app-picker-options">
+                    <button id="pick-books-btn" class="app-picker-btn">
+                        📚 Books
+                    </button>
+                    <button id="pick-chat-btn" class="app-picker-btn">
+                        💬 Chat
+                    </button>
+                </div>
             </div>
         </div>
 

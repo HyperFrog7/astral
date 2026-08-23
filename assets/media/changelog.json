@@ -1,8 +1,17 @@
 [
   {
-    "version": "1.0.0",
-    "tagline": "Astral Official Release",
-    "changes": ["Added 2,500+ Games", "Added tab cloaking and about:blank"]
+    "version": "2.0.0",
+    "tagline": "Astral chat is here!",
+    "changes": ["added astral chat", "resources.html picks books or chat"]
+  },
+  {
+    "version": "1.2.0",
+    "tagline": "Better g0guardian byp@ss",
+    "changes": [
+      "resources.html now uses a javascript loader so gg ai cant scan it (i think)",
+      "added auto tab cloak that chooses random site",
+      "polished settings + added themes"
+    ]
   },
   {
     "version": "1.1.0",
@@ -14,12 +23,8 @@
     ]
   },
   {
-    "version": "1.2.0",
-    "tagline": "Better g0guardian byp@ss",
-    "changes": [
-      "resources.html now uses a javascript loader so gg ai cant scan it (i think)",
-      "added auto tab cloak that chooses random site",
-      "polished settings + added themes"
-    ]
+    "version": "1.0.0",
+    "tagline": "Astral Official Release",
+    "changes": ["Added 2,500+ Games", "Added tab cloaking and about:blank"]
   }
 ]

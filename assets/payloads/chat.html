@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <base href="https://cdn.jsdelivr.net/gh/hyperfrog7/Astral@main/" />
+        <title>Astral Chat</title>
+        <link rel="stylesheet" href="assets/css/style.css" />
+        <link rel="icon" type="image/svg+xml" href="assets/media/logo.svg" />
+    </head>
+    <body>
+        <div class="standalone-chat-page">
+            <div class="chat-app-header">
+                <h1 class="title">Astral Chat</h1>
+            </div>
+
+            <div class="chat-container chat-container-standalone">
+                <div class="chat-sidebar">
+                    <div class="chat-sidebar-header">
+                        <span>Servers</span>
+                        <button
+                            id="create-server-btn"
+                            class="chat-icon-btn"
+                            title="Create Server"
+                        >
+                            +
+                        </button>
+                    </div>
+                    <div id="server-list" class="server-list"></div>
+                </div>
+                <div class="chat-main">
+                    <div class="chat-main-header">
+                        <span id="current-server-name">Select a server</span>
+                    </div>
+                    <div id="chat-messages" class="chat-messages">
+                        <div class="chat-empty-state">
+                            Select or create a server to start chatting
+                        </div>
+                    </div>
+                    <div class="chat-input-row">
+                        <input
+                            id="chat-message-input"
+                            type="text"
+                            placeholder="Message..."
+                            maxlength="500"
+                        />
+                        <button id="send-message-btn" class="settings-btn">
+                            Send
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="create-server-modal" class="modal-overlay hidden">
+            <div class="modal-card">
+                <div class="modal-header">
+                    <h2>Create Server</h2>
+                </div>
+                <div class="modal-body">
+                    <input
+                        id="new-server-name-input"
+                        class="setting-input chat-modal-input"
+                        type="text"
+                        placeholder="Server name"
+                        maxlength="40"
+                    />
+                </div>
+                <div class="modal-footer">
+                    <button id="confirm-create-server-btn" class="modal-btn">
+                        Create
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="chat-username-modal" class="modal-overlay hidden">
+            <div class="modal-card">
+                <div class="modal-header">
+                    <h2>Choose a display name</h2>
+                </div>
+                <div class="modal-body">
+                    <input
+                        id="chat-username-input"
+                        class="setting-input chat-modal-input"
+                        type="text"
+                        placeholder="Display name"
+                        maxlength="20"
+                    />
+                </div>
+                <div class="modal-footer">
+                    <button id="confirm-username-btn" class="modal-btn">
+                        Continue
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <script type="module" src="assets/js/chat.js"></script>
+    </body>
+</html>
